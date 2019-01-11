@@ -22,7 +22,7 @@ namespace UIPathValidator.UIPath
 
         public Workflow InitialWorkflow { get; protected set; }
 
-        public Dictionary<string, Workflow> Workflows { get; protected set; }
+        protected Dictionary<string, Workflow> Workflows { get; set; }
 
         private bool loaded;
 
@@ -104,6 +104,14 @@ namespace UIPathValidator.UIPath
                 if (MainFile.Equals(fullName, StringComparison.InvariantCultureIgnoreCase))
                     InitialWorkflow = wf;
             }
+        }
+
+        public Workflow GetWorkflow(string workflowPath)
+        {
+            if (Workflows.ContainsKey(workflowPath))
+                return Workflows[workflowPath];
+            
+            return null;
         }
     }
 }

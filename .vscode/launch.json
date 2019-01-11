@@ -1,0 +1,18 @@
+{
+   // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+   "version": "0.2.0",
+   "configurations": [
+        {
+            "name": ".NET Core Launch",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/UIPathValidator.CLI/bin/Debug/netcoreapp2.1/UIPathValidator.CLI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/UIPathValidator.CLI",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ,]
+}

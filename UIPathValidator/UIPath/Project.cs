@@ -22,7 +22,7 @@ namespace UIPathValidator.UIPath
 
         public Workflow InitialWorkflow { get; protected set; }
 
-        protected Dictionary<string, Workflow> Workflows { get; set; }
+        public Dictionary<string, Workflow> Workflows { get; protected set; }
 
         private bool loaded;
 

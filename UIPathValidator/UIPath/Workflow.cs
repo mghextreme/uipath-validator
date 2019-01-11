@@ -13,8 +13,8 @@ namespace UIPathValidator.UIPath
         public Workflow(string path)
         {
             path = Path.GetFullPath(path);
-            if (File.Exists(path))
-
+            if (!File.Exists(path))
+                throw new FileNotFoundException("The specified workflow file was not found.");
 
             FilePath = path;
         }

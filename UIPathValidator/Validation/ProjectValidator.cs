@@ -2,21 +2,18 @@ using System;
 using System.Collections.Generic;
 using UIPathValidator.UIPath;
 
-namespace UIPathValidator
+namespace UIPathValidator.Validation
 {
-    public class ProjectValidator : IValidator
+    public class ProjectValidator : Validator
     {
         protected Project Project { get; set; }
 
-        public List<ValidationResult> Results { get; protected set; }
-
-        public ProjectValidator(Project project) 
+        public ProjectValidator(Project project) : base()
         {
             this.Project = project;
-            Results = new List<ValidationResult>();
         }
 
-        public void Validate()
+        public override void Validate()
         {
             Project.EnsureLoad();
 
@@ -25,7 +22,7 @@ namespace UIPathValidator
             {
                 var validator = new WorkflowValidator(workflow);
                 validator.Validate();
-                Results.AddRange(validator.Results);
+                Results.AddRange(validator.GetResults());
             }
         }
     }

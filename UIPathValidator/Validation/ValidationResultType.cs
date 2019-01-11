@@ -1,4 +1,4 @@
-namespace UIPathValidator
+namespace UIPathValidator.Validation
 {
     public enum ValidationResultType
     {

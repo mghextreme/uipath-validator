@@ -1,4 +1,4 @@
-namespace UIPathValidator
+namespace UIPathValidator.Validation
 {
     public class ValidationResult
     {
@@ -6,9 +6,9 @@ namespace UIPathValidator
 
         public string Message { get; set; }
         
-        public int File { get; set; }
+        public virtual string FormattedMessage { get { return Message; } }
 
-        public int Line { get; set; }
+        public ValidationResult() { }
 
         public ValidationResult(string message)
         {
@@ -16,9 +16,16 @@ namespace UIPathValidator
             Message = message;
         }
 
+        public ValidationResult(ValidationResultType type)
+        {
+            Type = type;
+        }
+
         public ValidationResult(string message, ValidationResultType type) : this(message)
         {
             Type = type;
         }
+        
+        public override string ToString() => string.Format("{0}: {1}", Type.ToString().ToUpper(), FormattedMessage);
     }
 }

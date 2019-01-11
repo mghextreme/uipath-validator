@@ -35,11 +35,11 @@ namespace UIPathValidator.UIPath
             Workflows = new Dictionary<string, Workflow>();
             loaded = false;
 
-            directory = Path.GetFullPath(directory);
-            if (!Directory.Exists(directory))
+            Folder = Path.GetFullPath(directory);
+            if (!Folder.EndsWith(Path.DirectorySeparatorChar.ToString()) || !Folder.EndsWith(Path.DirectorySeparatorChar.ToString()))
+                Folder += Path.DirectorySeparatorChar;
+            if (!Directory.Exists(Folder))
                 throw new DirectoryNotFoundException("The specified directory was not found.");
-            
-            Folder = directory;
         }
 
         public void Load()
@@ -98,7 +98,7 @@ namespace UIPathValidator.UIPath
             foreach (var file in files)
             {
                 string fullName = file.FullName;
-                var wf = new Workflow(fullName);
+                var wf = new Workflow(this, fullName);
                 Workflows.Add(PathHelper.MakeRelativePath(fullName, Folder), wf);
 
                 if (MainFile.Equals(fullName, StringComparison.InvariantCultureIgnoreCase))

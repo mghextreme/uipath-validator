@@ -7,13 +7,13 @@ namespace UIPathValidator.CLI
 {
     class Program
     {
-        const string ProjectFolder = @"C:\Projects\Capgemini\HRO\HelpDesk2.0\Automation";
+        const string ProjectFolder = @"E:\Matias\Documents\UiPath\Example\";
 
         static void Main(string[] args)
         {
             Project project = new Project(ProjectFolder);
             ProjectValidator validator = new ProjectValidator(project);
-            
+
             Console.WriteLine("Loading...");
             project.Load();
 

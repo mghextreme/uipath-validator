@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -104,6 +105,14 @@ namespace UIPathValidator.UIPath
                 if (MainFile.Equals(fullName, StringComparison.InvariantCultureIgnoreCase))
                     InitialWorkflow = wf;
             }
+        }
+
+        public IEnumerable<Workflow> GetWorkflows()
+        {
+            if (Workflows.Count > 0)
+                return Workflows.Values.ToArray();
+            
+            return new List<Workflow>();
         }
 
         public Workflow GetWorkflow(string workflowPath)

@@ -17,8 +17,10 @@ namespace UIPathValidator.Validation
         {
             Project.EnsureLoad();
 
+            var workflows = Project.GetWorkflows();
+
             // First, validate files individually
-            foreach (Workflow workflow in Project.Workflows.Values)
+            foreach (Workflow workflow in workflows)
             {
                 var validator = new WorkflowValidator(workflow);
                 validator.Validate();

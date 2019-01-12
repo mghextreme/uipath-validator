@@ -1,3 +1,4 @@
+using System.IO;
 using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation
@@ -12,7 +13,10 @@ namespace UIPathValidator.Validation
         {
             get
             {
-                return string.Format("{0} - {1}: {2}", Workflow.RelativePath, TaskName, Message);
+                var where = PathHelper.MakeRelativePath(File, Workflow.Project.Folder);
+                if (!string.IsNullOrWhiteSpace(TaskName))
+                    where += $" ({TaskName})";
+                return string.Format("{0} - {1}: {2}", Workflow.RelativePath, where, Message);
             }
         }
 

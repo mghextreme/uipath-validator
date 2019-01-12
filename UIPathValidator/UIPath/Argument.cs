@@ -1,3 +1,6 @@
+using System.Xml;
+using System.Xml.Linq;
+
 namespace UIPathValidator.UIPath
 {
     public class Argument : Variable
@@ -31,6 +34,15 @@ namespace UIPathValidator.UIPath
             arg.Type = type.Substring(parenthesisIndex + 1, type.Length - parenthesisIndex - 2);
             
             return arg;
+        }
+
+        public static Argument CreateFromArgumentNode(XElement node, XmlNamespaceManager namespaces)
+        {
+            var name = node.Attribute(XName.Get("Key", namespaces.LookupNamespace("x")))?.Value;
+            var type = node.Attribute(XName.Get("TypeArguments", namespaces.LookupNamespace("x")))?.Value;
+            var direction = ArgumentDirectionMethods.Parse(node.Name.LocalName);
+
+            return new Argument(name, direction, type);
         }
     }
 }

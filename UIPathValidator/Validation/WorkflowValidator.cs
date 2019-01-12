@@ -27,6 +27,7 @@ namespace UIPathValidator.Validation
             ValidateArguments();
             ValidateVariables();
             GetAndValidateInvokes();
+            ValidateCommentedActivities();
         }
 
         protected void ValidateArguments()
@@ -150,6 +151,18 @@ namespace UIPathValidator.Validation
                     var message = string.Format("The called argument {0} doesn't exists in the workflow.", arg.Name);
                     AddResult(new InvokeValidationResult(this.Workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
                 }
+            }
+        }
+
+        private void ValidateCommentedActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var commentOutTags = reader.Document.Descendants(XName.Get("CommentOut", reader.Namespaces.LookupNamespace("ui")));
+
+            foreach (var commentOut in commentOutTags)
+            {
+                var nameAttr = commentOut.Attribute("DisplayName")?.Value ?? "CommentOut";
+                
             }
         }
     }

@@ -27,6 +27,7 @@ namespace UIPathValidator.Validation
             ValidateArguments();
             ValidateVariables();
             GetAndValidateInvokes();
+            ValidateIfActivities();
             ValidateCommentedActivities();
         }
 
@@ -42,12 +43,11 @@ namespace UIPathValidator.Validation
                 {
                     var underscorePos = argument.Name.IndexOf('_');
                     var name = argument.Name.Substring(underscorePos + 1);
-                    var ascName = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(name));
 
-                    if (!name.Equals(ascName))
+                    if (ContainsAccents(name))
                         AddResult(new ArgumentValidationResult(argument.Name, Workflow, ValidationResultType.Warning, $"Argument contains invalid non-ASCII characters."));
                     
-                    if (name[0] > 90)
+                    if (!IsCapitalLetter(name[0]))
                         AddResult(new ArgumentValidationResult(argument.Name, Workflow, ValidationResultType.Warning, $"Argument doesn't start with a capital letter."));
                 }
             }
@@ -57,11 +57,23 @@ namespace UIPathValidator.Validation
         {
             foreach (var variable in Workflow.Variables)
             {
-                if (variable.Name[0] > 90)
-                {
+                if (ContainsAccents(variable.Name))
+                    AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable contains invalid non-ASCII characters."));
+
+                if (!IsCapitalLetter(variable.Name[0]))
                     AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable doesn't start with a capital letter."));
-                }
             }
+        }
+
+        private bool IsCapitalLetter(char letter)
+        {
+            return letter >= 65 && letter <= 90;
+        }
+
+        private bool ContainsAccents(string text)
+        {
+            var ascText = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(text));
+            return !text.Equals(ascText);
         }
 
         private void GetAndValidateInvokes()
@@ -150,6 +162,26 @@ namespace UIPathValidator.Validation
                 {
                     var message = string.Format("The called argument {0} doesn't exists in the workflow.", arg.Name);
                     AddResult(new InvokeValidationResult(this.Workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                }
+            }
+        }
+
+        private void ValidateIfActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var ifTags = reader.Document.Descendants(XName.Get("If", reader.Namespaces.DefaultNamespace));
+
+            foreach (var ifTag in ifTags)
+            {
+                var ifThenTag = ifTag.Elements(XName.Get("If.Then", reader.Namespaces.DefaultNamespace));
+                var ifElseTag = ifTag.Elements(XName.Get("If.Else", reader.Namespaces.DefaultNamespace));
+
+                if (ifThenTag.Count() == 0 &&
+                    ifElseTag.Count() == 0)
+                {
+                    var name = ifTag.Attribute("DisplayName")?.Value ?? "If";
+                    var message = "If activity has no activities inside.";
+                    AddResult(new IfValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
             }
         }

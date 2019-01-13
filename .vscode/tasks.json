@@ -3,7 +3,10 @@
     "tasks": [
         {
             "label": "build",
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "command": "dotnet",
             "type": "shell",
             "args": [
@@ -26,6 +29,17 @@
             "presentation": {
                 "reveal": "silent"
             },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "group": "none",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "publish",
+                "${workspaceFolder}"
+            ],
             "problemMatcher": "$msCompile"
         }
     ]

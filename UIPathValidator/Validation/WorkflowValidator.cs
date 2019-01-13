@@ -161,8 +161,9 @@ namespace UIPathValidator.Validation
 
             foreach (var commentOut in commentOutTags)
             {
-                var nameAttr = commentOut.Attribute("DisplayName")?.Value ?? "CommentOut";
-                
+                var name = commentOut.Attribute("DisplayName")?.Value ?? "CommentOut";
+                var message = "CommentOut activities should be removed from workflow.";
+                AddResult(new CommentOutValidationResult(this.Workflow, name, ValidationResultType.Info, message));
             }
         }
     }

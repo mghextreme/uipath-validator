@@ -4,37 +4,27 @@ namespace UIPathValidator.Validation
 {
     public class CommentOutValidationResult : ValidationResult
     {
-        public string ArgumentName { get; set; }
+        public string TaskName { get; set; }
         public Workflow Workflow { get; set; }
 
         public override string FormattedMessage
         {
             get
             {
-                return string.Format("{0} - {1}: {2}", Workflow.RelativePath, ArgumentName, Message);
+                return string.Format("{0} - {1}: {2}", Workflow.RelativePath, TaskName, Message);
             }
         }
 
-        public CommentOutValidationResult(string argumentName) : base(ValidationResultType.Warning)
-        {
-            ArgumentName = argumentName;
-        }
+        public CommentOutValidationResult(Workflow workflow) : this(workflow, "CommentOut") { }
 
-        public CommentOutValidationResult(string argumentName, Workflow workflow) : base(ValidationResultType.Warning)
+        public CommentOutValidationResult(Workflow workflow, string taskName) : this(workflow, taskName, ValidationResultType.Info) { }
+
+        public CommentOutValidationResult(Workflow workflow, string taskName, ValidationResultType type) : this(workflow, taskName, type, string.Empty) { }
+
+        public CommentOutValidationResult(Workflow workflow, string taskName, ValidationResultType type, string message) : base(message, type)
         {
-            ArgumentName = argumentName;
+            TaskName = taskName;
             Workflow = workflow;
         }
-
-        public CommentOutValidationResult(string argumentName, Workflow workflow, ValidationResultType type) : base(type)
-        {
-            ArgumentName = argumentName;
-            Workflow = workflow;
-        }
-
-        public CommentOutValidationResult(string argumentName, Workflow workflow, ValidationResultType type, string message) : base(message, type)
-        {
-            Workflow = workflow;
-            ArgumentName = argumentName;
-        }
+    }
 }

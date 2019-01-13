@@ -32,6 +32,7 @@ namespace UIPathValidator.Validation
             ValidateSequenceActivities();
             ValidateWhileActivities();
             ValidateDoWhileActivities();
+            ValidateTryCatchActivities();
             ValidateCommentedActivities();
         }
 
@@ -304,6 +305,34 @@ namespace UIPathValidator.Validation
                 {
                     var name = doWhileTag.Attribute("DisplayName")?.Value ?? "Do While";
                     var message = "Do While activity has no activities inside.";
+                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
+            }
+        }
+
+        private void ValidateTryCatchActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var tryCatchTags = reader.Document.Descendants(XName.Get("TryCatch", reader.Namespaces.DefaultNamespace));
+
+            foreach (var tryCatchTag in tryCatchTags)
+            {
+                var name = tryCatchTag.Attribute("DisplayName")?.Value ?? "Do While";
+                
+                var tcTry = tryCatchTag.Element(XName.Get("TryCatch.Try", reader.Namespaces.DefaultNamespace));
+                var tcCatches = tryCatchTag.Element(XName.Get("TryCatch.Catches", reader.Namespaces.DefaultNamespace));
+                var tcFinally = tryCatchTag.Element(XName.Get("TryCatch.Finally", reader.Namespaces.DefaultNamespace));
+
+                if (tcTry == null || tcTry.Elements().Count() == 0)
+                {
+                    var message = "Try Catch activity has no activities inside.";
+                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
+
+                if ((tcCatches == null || tcCatches.Elements().Count() == 0) ||
+                    (tcFinally == null || tcFinally.Elements().Count() == 0))
+                {
+                    var message = "Try Catch activity has no catches and/or finally.";
                     AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
             }

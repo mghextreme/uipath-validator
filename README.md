@@ -37,10 +37,12 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 - Flowchart
   - Should not have any disconnected / orphans activities
   - Suggests that Flowchart with no decisions or switches should be sequences
+- Try Catch
+  - Should have at least one activity in the Try section
+  - Should have at least one activity in either a catch or on the finally section
 
 ## TODO
 
 - Ignore workflows errors when inside CommentOut
 - Check for files not being used
-- Try Catch should have catches
 - Switches need cases

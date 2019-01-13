@@ -24,15 +24,11 @@ The application will run on a specified folder and check for many inconsistences
   - While activities should have at least one activity inside
   - Do While activities should have at least one activity inside
   - If activities should have at least one activity on either then or else
+- Flowchart
+  - Should not have any disconnected / orphans activities
 
 ## TODO
 
 - Ignore workflows errors when inside CommentOut
 - Check for Flowcharts with no Flow Decisions
-- Check for Ifs with no content
 - Check for files not being used
-- Check for empty sequences
-- Check for empty flowcharts
-- Check for empty whiles
-- Check for empty do whiles
-- Not Connected activities in a flowchart

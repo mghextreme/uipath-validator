@@ -205,6 +205,18 @@ namespace UIPathValidator.Validation
                     var message = "Flowchart activity doens't have a Start Node.";
                     AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
+
+                var orphanNodes = flowchartTag.Elements(XName.Get("FlowStep", reader.Namespaces.DefaultNamespace));
+
+                if (orphanNodes.Count() > 0)
+                {
+                    var name = flowchartTag.Attribute("DisplayName")?.Value ?? "Flowchart";
+                    var message = string.Format("Flowchart contains {0} node{1} that will never be reached. Either use {2} ot delete {2}.",
+                        orphanNodes.Count(),
+                        orphanNodes.Count() > 1 ? "s" : string.Empty,
+                        orphanNodes.Count() > 1 ? "them" : "it");
+                    AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
             }
         }
 

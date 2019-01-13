@@ -24,7 +24,7 @@ namespace UIPathValidator.Validation
             return new List<ValidationResult>(Results.ToArray());
         }
 
-        public IEnumerable<ValidationResult> SelectResultByType(ValidationResultType type)
+        public IEnumerable<ValidationResult> GetResultsByType(ValidationResultType type)
         {
             return
                 (from item in Results
@@ -32,9 +32,14 @@ namespace UIPathValidator.Validation
                 select item);
         }
 
-        public int CountType(ValidationResultType type)
+        public int Count()
         {
-            return SelectResultByType(type).Count();
+            return Results.Count;
+        }
+
+        public int CountByType(ValidationResultType type)
+        {
+            return GetResultsByType(type).Count();
         }
     }
 }

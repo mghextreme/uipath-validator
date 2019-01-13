@@ -4,6 +4,16 @@ This is a project currently being built to ensure that an UIPath Project is usin
 
 The application will run on a specified folder and check for many inconsistences in the project, returning them as a list. Below you can find what are the current validations.
 
+## How to use it
+
+Open the solution and make sure to publish it:
+
+`Ctrl + Shift + P > Tasks: Run Task > publish`
+
+After published, you may open the project folder for the `UIPathValidator.CLI`, navigate to the folder containing the `.exe` (probably `\bin\Release\netcoreapp2.1\win10-x64`) and run the following command:
+
+`UIPathValidator.CLI.exe validate -p <your-project-folder>`
+
 ## Validations
 
 - Variables
@@ -33,5 +43,4 @@ The application will run on a specified folder and check for many inconsistences
 - Ignore workflows errors when inside CommentOut
 - Check for files not being used
 - Try Catch should have catches
-- Proper CLI interface
 - Switches need cases

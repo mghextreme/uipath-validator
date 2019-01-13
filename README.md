@@ -19,10 +19,10 @@ The application will run on a specified folder and check for many inconsistences
   - No spare arguments should be present
   - Arguments should have the same type and direction
 - Empty scopes
-  <!-- - Flowchart activities should have at least one activity inside -->
-  <!-- - Sequence activities should have at least one activity inside -->
-  <!-- - While activities should have at least one activity inside -->
-  <!-- - Do While activities should have at least one activity inside -->
+  - Flowchart activities should have at least one activity inside
+  - Sequence activities should have at least one activity inside
+  - While activities should have at least one activity inside
+  - Do While activities should have at least one activity inside
   - If activities should have at least one activity on either then or else
 
 ## TODO
@@ -35,3 +35,4 @@ The application will run on a specified folder and check for many inconsistences
 - Check for empty flowcharts
 - Check for empty whiles
 - Check for empty do whiles
+- Not Connected activities in a flowchart

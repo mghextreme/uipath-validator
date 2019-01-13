@@ -28,6 +28,10 @@ namespace UIPathValidator.Validation
             ValidateVariables();
             GetAndValidateInvokes();
             ValidateIfActivities();
+            ValidateFlowchartActivities();
+            ValidateSequenceActivities();
+            ValidateWhileActivities();
+            ValidateDoWhileActivities();
             ValidateCommentedActivities();
         }
 
@@ -181,7 +185,79 @@ namespace UIPathValidator.Validation
                 {
                     var name = ifTag.Attribute("DisplayName")?.Value ?? "If";
                     var message = "If activity has no activities inside.";
-                    AddResult(new IfValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
+            }
+        }
+
+        private void ValidateFlowchartActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var flowchartTags = reader.Document.Descendants(XName.Get("Flowchart", reader.Namespaces.DefaultNamespace));
+
+            foreach (var flowchartTag in flowchartTags)
+            {
+                var startNode = flowchartTag.Element(XName.Get("Flowchart.StartNode", reader.Namespaces.DefaultNamespace));
+
+                if (startNode == null)
+                {
+                    var name = flowchartTag.Attribute("DisplayName")?.Value ?? "Flowchart";
+                    var message = "Flowchart activity doens't have a Start Node.";
+                    AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
+            }
+        }
+
+        private void ValidateSequenceActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var sequenceTags = reader.Document.Descendants(XName.Get("Sequence", reader.Namespaces.DefaultNamespace));
+
+            foreach (var sequenceTag in sequenceTags)
+            {
+                var insideTags = sequenceTag.Elements();
+
+                if (insideTags.Count() == 0)
+                {
+                    var name = sequenceTag.Attribute("DisplayName")?.Value ?? "Sequence";
+                    var message = "Sequence activity has no activities inside.";
+                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
+            }
+        }
+
+        private void ValidateWhileActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var whileTags = reader.Document.Descendants(XName.Get("While", reader.Namespaces.DefaultNamespace));
+
+            foreach (var whileTag in whileTags)
+            {
+                var insideTags = whileTag.Elements();
+
+                if (insideTags.Count() == 0)
+                {
+                    var name = whileTag.Attribute("DisplayName")?.Value ?? "While";
+                    var message = "While activity has no activities inside.";
+                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                }
+            }
+        }
+
+        private void ValidateDoWhileActivities()
+        {
+            var reader = Workflow.GetXamlReader();
+            var doWhileTags = reader.Document.Descendants(XName.Get("DoWhile", reader.Namespaces.DefaultNamespace));
+
+            foreach (var doWhileTag in doWhileTags)
+            {
+                var insideTags = doWhileTag.Elements();
+
+                if (insideTags.Count() == 0)
+                {
+                    var name = doWhileTag.Attribute("DisplayName")?.Value ?? "Do While";
+                    var message = "Do While activity has no activities inside.";
+                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
             }
         }

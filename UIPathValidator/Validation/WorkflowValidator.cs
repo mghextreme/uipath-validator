@@ -198,24 +198,59 @@ namespace UIPathValidator.Validation
             foreach (var flowchartTag in flowchartTags)
             {
                 var startNode = flowchartTag.Element(XName.Get("Flowchart.StartNode", reader.Namespaces.DefaultNamespace));
+                var name = flowchartTag.Attribute("DisplayName")?.Value ?? "Flowchart";
 
                 if (startNode == null)
                 {
-                    var name = flowchartTag.Attribute("DisplayName")?.Value ?? "Flowchart";
                     var message = "Flowchart activity doens't have a Start Node.";
                     AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
-
-                var orphanNodes = flowchartTag.Elements(XName.Get("FlowStep", reader.Namespaces.DefaultNamespace));
-
-                if (orphanNodes.Count() > 0)
+                else
                 {
-                    var name = flowchartTag.Attribute("DisplayName")?.Value ?? "Flowchart";
-                    var message = string.Format("Flowchart contains {0} node{1} that will never be reached. Either use {2} ot delete {2}.",
-                        orphanNodes.Count(),
-                        orphanNodes.Count() > 1 ? "s" : string.Empty,
-                        orphanNodes.Count() > 1 ? "them" : "it");
-                    AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                    var orphanNodes = flowchartTag.Elements(XName.Get("FlowStep", reader.Namespaces.DefaultNamespace));
+
+                    if (orphanNodes.Count() > 0)
+                    {
+                        var message = string.Format("Flowchart contains {0} node{1} that will never be reached. Either use {2} ot delete {2}.",
+                            orphanNodes.Count(),
+                            orphanNodes.Count() > 1 ? "s" : string.Empty,
+                            orphanNodes.Count() > 1 ? "them" : "it");
+                        AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
+                    }
+
+                    var decisionTags = startNode.Descendants(XName.Get("FlowDecision", reader.Namespaces.DefaultNamespace));
+                    var switchTags = startNode.Descendants(XName.Get("FlowSwitch", reader.Namespaces.DefaultNamespace));
+                    bool hasAnyDecisionTag = false;
+
+                    if (decisionTags.Count() > 0)
+                    {
+                        foreach (var tag in decisionTags)
+                        {
+                            if (IsDirectlyInFlowchart(tag, startNode, reader.Namespaces))
+                            {
+                                hasAnyDecisionTag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hasAnyDecisionTag && switchTags.Count() > 0)
+                    {
+                        foreach (var tag in switchTags)
+                        {
+                            if (IsDirectlyInFlowchart(tag, startNode, reader.Namespaces))
+                            {
+                                hasAnyDecisionTag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!hasAnyDecisionTag)
+                    {
+                        var message = "Flowchart activity doens't have any decisions. Shouldn't this be a sequence?";
+                        AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Info, message));
+                    }
                 }
             }
         }
@@ -285,6 +320,21 @@ namespace UIPathValidator.Validation
                 var message = "CommentOut activities should be removed from workflow.";
                 AddResult(new CommentOutValidationResult(this.Workflow, name, ValidationResultType.Info, message));
             }
+        }
+
+        private bool IsDirectlyInFlowchart(XElement node, XElement flowchart, XmlNamespaceManager namespaces)
+        {
+            var startNodes = node.Ancestors(XName.Get("Flowchart.StartNode", namespaces.DefaultNamespace));
+            
+            if (startNodes.Count() == 0)
+                return false;
+            
+            string firstParentNodeRefId = startNodes.First().Parent.Attribute(XName.Get("WorkflowViewState.IdRef", namespaces.LookupNamespace("sap2010")))?.Value;
+            string flowchartRefId = flowchart.Parent.Attribute(XName.Get("WorkflowViewState.IdRef", namespaces.LookupNamespace("sap2010")))?.Value;
+            if (flowchartRefId.Equals(firstParentNodeRefId))
+                return true;
+            
+            return false;
         }
     }
 }

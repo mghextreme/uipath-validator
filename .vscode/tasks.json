@@ -38,7 +38,11 @@
             "type": "shell",
             "args": [
                 "publish",
-                "${workspaceFolder}"
+                "-c",
+                "Release",
+                "-r",
+                "win10-x64",
+                "--self-contained"
             ],
             "problemMatcher": "$msCompile"
         }

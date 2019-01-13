@@ -26,9 +26,12 @@ The application will run on a specified folder and check for many inconsistences
   - If activities should have at least one activity on either then or else
 - Flowchart
   - Should not have any disconnected / orphans activities
+  - Suggests that Flowchart with no decisions or switches should be sequences
 
 ## TODO
 
 - Ignore workflows errors when inside CommentOut
-- Check for Flowcharts with no Flow Decisions
 - Check for files not being used
+- Try Catch should have catches
+- Proper CLI interface
+- Switches need cases

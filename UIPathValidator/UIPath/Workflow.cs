@@ -62,8 +62,11 @@ namespace UIPathValidator.UIPath
             Reader = new XamlReader(FilePath);
 
             // Read Arguments
-            var members = Reader.Document.Root.Elements(XName.Get("Members", Reader.Namespaces.LookupNamespace("x")));
-            ParseArguments(members, Reader.Namespaces);
+            if (Reader.Namespaces.HasNamespace("x"))
+            {
+                var members = Reader.Document.Root.Elements(XName.Get("Members", Reader.Namespaces.LookupNamespace("x")));
+                ParseArguments(members, Reader.Namespaces);
+            }
 
             // Read Variables
             var variables = Reader.Document.Root.Descendants(XName.Get("Variable", Reader.Namespaces.DefaultNamespace));
@@ -74,6 +77,9 @@ namespace UIPathValidator.UIPath
 
         protected void ParseArguments(IEnumerable<XElement> members, XmlNamespaceManager namespaces)
         {
+            if (!namespaces.HasNamespace("x"))
+                return;
+
             var arguments = members.Elements(XName.Get("Property", namespaces.LookupNamespace("x")));
             foreach (var arg in arguments)
             {
@@ -86,6 +92,9 @@ namespace UIPathValidator.UIPath
 
         private void ParseVariables(IEnumerable<XElement> variables, XmlNamespaceManager namespaces)
         {
+            if (!namespaces.HasNamespace("x"))
+                return;
+            
             foreach (var variab in variables)
             {
                 var name = variab.Attribute("Name").Value;

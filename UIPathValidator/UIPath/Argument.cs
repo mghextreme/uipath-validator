@@ -38,6 +38,9 @@ namespace UIPathValidator.UIPath
 
         public static Argument CreateFromArgumentNode(XElement node, XmlNamespaceManager namespaces)
         {
+            if (!namespaces.HasNamespace("x"))
+                return null;
+
             var name = node.Attribute(XName.Get("Key", namespaces.LookupNamespace("x")))?.Value;
             var type = node.Attribute(XName.Get("TypeArguments", namespaces.LookupNamespace("x")))?.Value;
             var direction = ArgumentDirectionMethods.Parse(node.Name.LocalName);

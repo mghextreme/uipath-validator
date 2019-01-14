@@ -12,12 +12,12 @@ namespace UIPathValidator.UIPath
         public string Name { get; protected set; }
         
         public string Version { get; protected set; }
-        
+
         public string StudioVersion { get; protected set; }
 
         public string Folder { get; protected set; }
 
-        public string ProjectFile { get; set; } = "project.json";
+        public string ProjectFile { get; protected set; } = "project.json";
 
         protected string MainFile { get; set; }
 
@@ -27,7 +27,9 @@ namespace UIPathValidator.UIPath
 
         private bool loaded;
 
-        public Project(string directory)
+        private bool hasProjectFile;
+
+        public Project(string path)
         {
             Name = string.Empty;
             Version = string.Empty;
@@ -36,9 +38,21 @@ namespace UIPathValidator.UIPath
             Workflows = new Dictionary<string, Workflow>();
             loaded = false;
 
-            Folder = Path.GetFullPath(directory);
+            path = Path.GetFullPath(path);
+            FileAttributes attr = File.GetAttributes(path);
+            if (attr.HasFlag(FileAttributes.Directory))
+            {
+                Folder = Path.GetFullPath(path);
+            }
+            else
+            {
+                ProjectFile = Path.GetFileName(path);
+                Folder = Path.GetDirectoryName(path);
+            }
+
             if (!Folder.EndsWith(Path.DirectorySeparatorChar.ToString()) || !Folder.EndsWith(Path.DirectorySeparatorChar.ToString()))
                 Folder += Path.DirectorySeparatorChar;
+
             if (!Directory.Exists(Folder))
                 throw new DirectoryNotFoundException("The specified directory was not found.");
         }
@@ -50,9 +64,20 @@ namespace UIPathValidator.UIPath
 
             string projectFile = Path.Combine(Folder, ProjectFile);
             if (!File.Exists(projectFile))
-                throw new FileNotFoundException("The project file was not found.");
-            
-            ReadProjectInfo(projectFile);
+            {
+                // Legacy versions
+                hasProjectFile = false;
+                Name = new DirectoryInfo(Folder).Name;
+                Version = "Legacy";
+                StudioVersion = "Legacy";
+                MainFile = string.Empty;
+                InitialWorkflow = null;
+            }
+            else
+            {
+                hasProjectFile = true;
+                ReadProjectInfo(projectFile);
+            }
 
             ReadProjectWorkflows(Folder);
 

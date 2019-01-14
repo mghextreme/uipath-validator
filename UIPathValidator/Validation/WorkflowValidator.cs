@@ -84,6 +84,10 @@ namespace UIPathValidator.Validation
         private void GetAndValidateInvokes()
         {
             var reader = Workflow.GetXamlReader();
+
+            if (!reader.Namespaces.HasNamespace("ui"))
+                return;
+            
             var invokes = reader.Document.Descendants(XName.Get("InvokeWorkflowFile", reader.Namespaces.LookupNamespace("ui")));
             var workflowFolder = Path.GetDirectoryName(Workflow.FilePath);
 
@@ -343,6 +347,10 @@ namespace UIPathValidator.Validation
         private void ValidateCommentedActivities()
         {
             var reader = Workflow.GetXamlReader();
+            
+            if (!reader.Namespaces.HasNamespace("ui"))
+                return;
+            
             var commentOutTags = reader.Document.Descendants(XName.Get("CommentOut", reader.Namespaces.LookupNamespace("ui")));
 
             foreach (var commentOut in commentOutTags)
@@ -358,6 +366,9 @@ namespace UIPathValidator.Validation
             var startNodes = node.Ancestors(XName.Get("Flowchart.StartNode", namespaces.DefaultNamespace));
             
             if (startNodes.Count() == 0)
+                return false;
+            
+            if (!namespaces.HasNamespace("sap2010"))
                 return false;
             
             string firstParentNodeRefId = startNodes.First().Parent.Attribute(XName.Get("WorkflowViewState.IdRef", namespaces.LookupNamespace("sap2010")))?.Value;

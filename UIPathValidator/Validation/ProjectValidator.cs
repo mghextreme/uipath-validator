@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation
@@ -30,23 +31,37 @@ namespace UIPathValidator.Validation
             // Validate InvokeWorkflow graph
             ResetWorkflowsColors();
             var stack = new Stack<Workflow>();
-            PaintWorfklow(Project.InitialWorkflow, stack);
 
-            foreach (var workflow in Project.GetWorkflows())
+            if (Project.InitialWorkflow != null)
             {
-                // If it's White, it's isolated from the graph
-                if (workflow.Color == GraphColor.White)
-                {
-                    var message = "The workflow is unreachable because it is never invoked. Should this file be removed?";
-                    Results.Add(new UnreachableWorkflowValidationResult(workflow, ValidationResultType.Warning, message));
-                }
+                Project.InitialWorkflow.UseStatus = UseStatus.Used;
+                PaintWorfklow(Project.InitialWorkflow, stack);
+            }
+            else
+            {
+                foreach (var workflow in Project.GetWorkflows())
+                    PaintWorfklow(workflow, stack);
+            }
+            
+            var notUsed = 
+                from workflow in Project.GetWorkflows()
+                    where workflow.UseStatus == UseStatus.NotMentioned
+                select workflow;
+
+            foreach (var workflow in notUsed)
+            {
+                var message = "The workflow is unreachable because it is never invoked. Should this file be removed?";
+                Results.Add(new UnreachableWorkflowValidationResult(workflow, ValidationResultType.Warning, message));
             }
         }
 
         protected void ResetWorkflowsColors()
         {
             foreach (var workflow in Project.GetWorkflows())
+            {
                 workflow.Color = GraphColor.White;
+                workflow.UseStatus = UseStatus.NotMentioned;
+            }
         }
 
         protected void PaintWorfklow(Workflow workflow, Stack<Workflow> stack)
@@ -59,10 +74,13 @@ namespace UIPathValidator.Validation
                 string cycleText = GetCycleText(stack, workflow);
                 string message = string.Format("The workflow contains a recursive invoke cycle. Make sure it is not an infinite loop: {0}.", cycleText);
                 var temp = stack.Pop();
-                AddResult(new InvokeValidationResult(stack.Peek(), workflow.FilePath, string.Empty, ValidationResultType.Warning, message));
+                AddResult(new InvokeValidationResult(stack.Peek(), workflow.FilePath, string.Empty, ValidationResultType.Info, message));
                 stack.Push(temp);
                 return;
             }
+
+            if (stack.Count > 0)
+                workflow.UseStatus = UseStatus.Used;
 
             workflow.Color = GraphColor.Gray;
             stack.Push(workflow);

@@ -20,7 +20,7 @@ namespace UIPathValidator.UIPath
 
         public List<Variable> Variables { get; protected set; }
 
-        public List<Workflow> ConnectedWorkflow { get; protected set; }
+        public HashSet<Workflow> ConnectedWorkflow { get; protected set; }
 
         public bool Parsed { get; protected set; }
 
@@ -49,6 +49,7 @@ namespace UIPathValidator.UIPath
             UseStatus = UseStatus.NotMentioned;
             Arguments = new List<Argument>();
             Variables = new List<Variable>();
+            ConnectedWorkflow = new HashSet<Workflow>();
         }
 
         public XamlReader GetXamlReader()

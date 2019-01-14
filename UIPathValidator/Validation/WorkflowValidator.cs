@@ -95,12 +95,14 @@ namespace UIPathValidator.Validation
                     file = Path.Combine(workflowFolder, file);
                 var fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
 
-                Workflow workflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
-                if (workflow == null)
+                Workflow invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
+                if (invokedWorkflow == null)
                 {
                     AddResult(new InvokeValidationResult(this.Workflow, file, name, ValidationResultType.Error, $"The workflow path was not found in the project folder."));
                     continue;
                 }
+
+                this.Workflow.ConnectedWorkflow.Add(invokedWorkflow);
 
                 var argumentsParent = invoke.Elements(XName.Get("InvokeWorkflowFile.Arguments", reader.Namespaces.LookupNamespace("ui")));
                 var argumentsElements = argumentsParent.Elements();
@@ -118,7 +120,7 @@ namespace UIPathValidator.Validation
                             break;
                     }
                 }
-                CheckInvokedArguments(workflow, arguments, name);
+                CheckInvokedArguments(invokedWorkflow, arguments, name);
             }
         }
 

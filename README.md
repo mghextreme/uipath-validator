@@ -28,6 +28,7 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
   - All workflow arguments should be present
   - No spare arguments should be present
   - Arguments should have the same type and direction
+  - Should avoid invoke recursion (chances of loop cycles)
 - Empty scopes
   - Flowchart activities should have at least one activity inside
   - Sequence activities should have at least one activity inside
@@ -40,9 +41,10 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 - Try Catch
   - Should have at least one activity in the Try section
   - Should have at least one activity in either a catch or on the finally section
+- Files
+  - Files should be invoked (directly or indirectly) from the main file at least once
 
 ## TODO
 
 - Ignore workflows errors when inside CommentOut
-- Check for files not being used
 - Switches need cases

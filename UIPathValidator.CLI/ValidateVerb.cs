@@ -21,13 +21,32 @@ namespace UIPathValidator.CLI
         [Option("hide-error", HelpText = "If should hide the results of type Error.", Default = false)]
         public bool HideError { get; set; }
 
+        protected ConsoleColor foregroundColor = ConsoleColor.Gray,
+                                infoColor = ConsoleColor.Blue,
+                                warningColor = ConsoleColor.Yellow,
+                                errorColor = ConsoleColor.Red;
+
         public int Execute()
         {
             Project project = new Project(Project);
             ProjectValidator validator = new ProjectValidator(project);
 
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
+            ConsoleColor foregroundBackup = Console.ForegroundColor;
+            ConsoleColor backgroundBackup = Console.BackgroundColor;
+
+            switch (backgroundBackup)
+            {
+                case ConsoleColor.Black: break;
+                case ConsoleColor.Blue:
+                case ConsoleColor.DarkBlue:
+                    foregroundColor = ConsoleColor.White;
+                    infoColor = ConsoleColor.Cyan;
+                    break;
+                default:
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = foregroundColor;
+                    break;
+            }
 
             Console.WriteLine("Loading info...");
             project.Load();
@@ -45,8 +64,13 @@ namespace UIPathValidator.CLI
             if (!HideInfo)
                 PrintResultsOfType(validator, ValidationResultType.Info);
             
+            Console.ForegroundColor = foregroundColor;
+            
             Console.WriteLine();
             Console.WriteLine("Total number of situations found: {0}", validator.Count());
+            
+            Console.ForegroundColor = foregroundBackup;
+            Console.BackgroundColor = backgroundBackup;
 
             return 0;
         }
@@ -63,11 +87,9 @@ namespace UIPathValidator.CLI
 
         private void WriteTypeCount(ValidationResultType type, int count)
         {
-            var color = GetColorFromResultType(type);
-            
             if (count > 0)
             {
-                Console.ForegroundColor = color;
+                Console.ForegroundColor = GetColorFromResultType(type);
                 Console.WriteLine("{0} {1} messages:", count, type.ToString());
             }
         }
@@ -76,7 +98,7 @@ namespace UIPathValidator.CLI
         {
             Console.ForegroundColor = GetColorFromResultType(resultItem.Type);
             Console.Write(resultItem.Type.ToString().ToUpper() + ": ");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = foregroundColor;
             Console.WriteLine(resultItem.FormattedMessage);
         }
 
@@ -84,9 +106,9 @@ namespace UIPathValidator.CLI
         {
             switch (type)
             {
-                case ValidationResultType.Error: return ConsoleColor.Red;
-                case ValidationResultType.Warning: return ConsoleColor.Yellow;
-                case ValidationResultType.Info: return ConsoleColor.Blue;
+                case ValidationResultType.Error: return errorColor;
+                case ValidationResultType.Warning: return warningColor;
+                case ValidationResultType.Info: return infoColor;
             }
             return ConsoleColor.White;
         }

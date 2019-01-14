@@ -46,5 +46,7 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 
 ## TODO
 
+- Check if namespace exists before lookup
 - Ignore workflows errors when inside CommentOut
 - Switches need cases
+- Invoked Workflow name as variable

@@ -22,6 +22,8 @@ namespace UIPathValidator.UIPath
 
         public HashSet<Workflow> ConnectedWorkflow { get; protected set; }
 
+        public bool HasDynamicallyInvokedWorkflows { get; set; }
+
         public bool Parsed { get; protected set; }
 
         protected XamlReader Reader { get; set; }

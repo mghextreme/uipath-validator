@@ -87,14 +87,24 @@ namespace UIPathValidator.Validation
 
             if (!reader.Namespaces.HasNamespace("ui"))
                 return;
-            
+
             var invokes = reader.Document.Descendants(XName.Get("InvokeWorkflowFile", reader.Namespaces.LookupNamespace("ui")));
             var workflowFolder = Path.GetDirectoryName(Workflow.FilePath);
 
             foreach (var invoke in invokes)
             {
+                if (IsInsideCommentOut(invoke, reader.Namespaces))
+                    continue;
+
                 var name = invoke.Attribute("DisplayName")?.Value;
                 var file = invoke.Attribute("WorkflowFileName")?.Value;
+
+                if (file.StartsWith("[") && file.EndsWith("]"))
+                {
+                    this.Workflow.HasDynamicallyInvokedWorkflows = true;
+                    continue;
+                }
+
                 if (!Path.IsPathRooted(file))
                     file = Path.Combine(workflowFolder, file);
                 var fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
@@ -184,6 +194,9 @@ namespace UIPathValidator.Validation
 
             foreach (var ifTag in ifTags)
             {
+                if (IsInsideCommentOut(ifTag, reader.Namespaces))
+                    continue;
+
                 var ifThenTag = ifTag.Elements(XName.Get("If.Then", reader.Namespaces.DefaultNamespace));
                 var ifElseTag = ifTag.Elements(XName.Get("If.Else", reader.Namespaces.DefaultNamespace));
 
@@ -204,6 +217,9 @@ namespace UIPathValidator.Validation
 
             foreach (var flowchartTag in flowchartTags)
             {
+                if (IsInsideCommentOut(flowchartTag, reader.Namespaces))
+                    continue;
+
                 var startNode = flowchartTag.Element(XName.Get("Flowchart.StartNode", reader.Namespaces.DefaultNamespace));
                 var name = flowchartTag.Attribute("DisplayName")?.Value ?? "Flowchart";
 
@@ -269,6 +285,9 @@ namespace UIPathValidator.Validation
 
             foreach (var sequenceTag in sequenceTags)
             {
+                if (IsInsideCommentOut(sequenceTag, reader.Namespaces))
+                    continue;
+
                 var insideTags = sequenceTag.Elements();
 
                 if (insideTags.Count() == 0)
@@ -287,6 +306,9 @@ namespace UIPathValidator.Validation
 
             foreach (var whileTag in whileTags)
             {
+                if (IsInsideCommentOut(whileTag, reader.Namespaces))
+                    continue;
+
                 var insideTags = whileTag.Elements();
 
                 if (insideTags.Count() == 0)
@@ -305,6 +327,9 @@ namespace UIPathValidator.Validation
 
             foreach (var doWhileTag in doWhileTags)
             {
+                if (IsInsideCommentOut(doWhileTag, reader.Namespaces))
+                    continue;
+
                 var insideTags = doWhileTag.Elements();
 
                 if (insideTags.Count() == 0)
@@ -323,6 +348,9 @@ namespace UIPathValidator.Validation
 
             foreach (var tryCatchTag in tryCatchTags)
             {
+                if (IsInsideCommentOut(tryCatchTag, reader.Namespaces))
+                    continue;
+
                 var name = tryCatchTag.Attribute("DisplayName")?.Value ?? "Do While";
                 
                 var tcTry = tryCatchTag.Element(XName.Get("TryCatch.Try", reader.Namespaces.DefaultNamespace));
@@ -335,7 +363,7 @@ namespace UIPathValidator.Validation
                     AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
 
-                if ((tcCatches == null || tcCatches.Elements().Count() == 0) ||
+                if ((tcCatches == null || tcCatches.Elements().Count() == 0) &&
                     (tcFinally == null || tcFinally.Elements().Count() == 0))
                 {
                     var message = "Try Catch activity has no catches and/or finally.";
@@ -377,6 +405,12 @@ namespace UIPathValidator.Validation
                 return true;
             
             return false;
+        }
+
+        private bool IsInsideCommentOut(XElement node, XmlNamespaceManager namespaces)
+        {
+            var ancestorComment = node.Ancestors(XName.Get("CommentOut", namespaces.LookupNamespace("ui")));
+            return ancestorComment.Any();
         }
     }
 }

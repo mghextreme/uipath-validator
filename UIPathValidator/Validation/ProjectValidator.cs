@@ -42,7 +42,7 @@ namespace UIPathValidator.Validation
                 foreach (var workflow in Project.GetWorkflows())
                     PaintWorfklow(workflow, stack);
             }
-            
+
             var notUsed = 
                 from workflow in Project.GetWorkflows()
                     where workflow.UseStatus == UseStatus.NotMentioned
@@ -50,8 +50,14 @@ namespace UIPathValidator.Validation
 
             foreach (var workflow in notUsed)
             {
-                var message = "The workflow is unreachable because it is never invoked. Should this file be removed?";
-                Results.Add(new UnreachableWorkflowValidationResult(workflow, ValidationResultType.Warning, message));
+                string message = Project.HasDynamicallyInvokedWorkflows ?
+                    "This workflow is never directly invoked. If it is unreachable consider removing it." :
+                    "The workflow is unreachable because it is never invoked. Should this file be removed?";
+                ValidationResultType type = Project.HasDynamicallyInvokedWorkflows ?
+                    ValidationResultType.Info :
+                    ValidationResultType.Warning;
+
+                Results.Add(new UnreachableWorkflowValidationResult(workflow, type, message));
             }
         }
 

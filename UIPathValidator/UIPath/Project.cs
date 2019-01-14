@@ -25,6 +25,16 @@ namespace UIPathValidator.UIPath
 
         protected Dictionary<string, Workflow> Workflows { get; set; }
 
+        public bool HasDynamicallyInvokedWorkflows
+        {
+            get
+            {
+                return (from item in Workflows.Values
+                            where item.HasDynamicallyInvokedWorkflows
+                        select item.HasDynamicallyInvokedWorkflows).Any();
+            }
+        }
+
         private bool loaded;
 
         private bool hasProjectFile;

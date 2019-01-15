@@ -409,6 +409,9 @@ namespace UIPathValidator.Validation
 
         private bool IsInsideCommentOut(XElement node, XmlNamespaceManager namespaces)
         {
+            if (!namespaces.HasNamespace("ui"))
+                return false;
+
             var ancestorComment = node.Ancestors(XName.Get("CommentOut", namespaces.LookupNamespace("ui")));
             return ancestorComment.Any();
         }

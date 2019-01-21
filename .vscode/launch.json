@@ -8,7 +8,11 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/UIPathValidator.CLI/bin/Debug/netcoreapp2.1/UIPathValidator.CLI.dll",
-            "args": [],
+            "args": [
+                "validate",
+                "-p",
+                "C:\\MyProjectFolder\\"
+            ],
             "cwd": "${workspaceFolder}/UIPathValidator.CLI",
             "console": "internalConsole",
             "stopAtEntry": false,

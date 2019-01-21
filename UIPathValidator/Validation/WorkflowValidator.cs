@@ -65,8 +65,8 @@ namespace UIPathValidator.Validation
                 if (ContainsAccents(variable.Name))
                     AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable contains invalid non-ASCII characters."));
 
-                if (!IsCapitalLetter(variable.Name[0]))
-                    AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable doesn't start with a capital letter."));
+                if (IsCapitalLetter(variable.Name[0]))
+                    AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable doesn't start with a lowercase letter."));
             }
         }
 

@@ -17,11 +17,11 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 ## Validations
 
 - Variables
-  - Names should start with a capital letter (CamelCase)
+  - Names should start with a lowercase letter (camelCase)
   - Names should not contain accents
 - Arguments
   - Names should start with direction prefix (e.g. in_)
-  - Names should start with a capital letter after the underscore
+  - Names should start with a capital letter after the underscore (TitleCase)
   - Names should not contain accents
 - Invoke Workflow
   - Invoked workflow file should exist

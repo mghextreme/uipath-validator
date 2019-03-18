@@ -46,6 +46,9 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 
 ## TODO
 
+- Avoid username / password variables with fixed values
 - Ignore workflows errors when inside CommentOut
 - Switches need cases
 - Invoked Workflow name as variable
+- Many Ifs inside Ifs
+- Loops inside loops

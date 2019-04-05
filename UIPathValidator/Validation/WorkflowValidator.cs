@@ -105,11 +105,28 @@ namespace UIPathValidator.Validation
                     continue;
                 }
 
-                if (!Path.IsPathRooted(file))
-                    file = Path.Combine(workflowFolder, file);
-                var fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
+                Workflow invokedWorkflow = null;
+                string fileRelativePath = string.Empty;
 
-                Workflow invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
+                if (Path.IsPathRooted(file))
+                {
+                    fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
+                    invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
+                }
+                else
+                {
+                    if (this.Workflow.Project.HasWorkflow(file))
+                    {
+                        invokedWorkflow = this.Workflow.Project.GetWorkflow(file);
+                    }
+                    else
+                    {
+                        var fileFullPath = Path.Combine(workflowFolder, file);
+                        fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
+                        invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
+                    }
+                }
+
                 if (invokedWorkflow == null)
                 {
                     AddResult(new InvokeValidationResult(this.Workflow, file, name, ValidationResultType.Error, $"The workflow path was not found in the project folder."));
@@ -140,6 +157,8 @@ namespace UIPathValidator.Validation
 
         private void CheckInvokedArguments(Workflow workflow, Dictionary<string, Argument> arguments, string displayName)
         {
+            workflow.EnsureParse();
+
             // Check if all invoked arguments have been called
             foreach (var arg in workflow.Arguments)
             {

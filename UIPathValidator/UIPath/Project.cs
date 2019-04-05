@@ -130,12 +130,12 @@ namespace UIPathValidator.UIPath
         {
             var dirInfo = new DirectoryInfo(directory);
             var files = dirInfo.GetFiles("*.xaml", SearchOption.AllDirectories);
-            
+
             foreach (var file in files)
             {
                 string fullName = file.FullName;
                 var wf = new Workflow(this, fullName);
-                Workflows.Add(PathHelper.MakeRelativePath(fullName, Folder), wf);
+                Workflows.Add(PathHelper.MakeRelativePath(fullName, Folder).ToLower(), wf);
 
                 if (MainFile.Equals(fullName, StringComparison.InvariantCultureIgnoreCase))
                     InitialWorkflow = wf;
@@ -150,8 +150,14 @@ namespace UIPathValidator.UIPath
             return new List<Workflow>();
         }
 
+        public bool HasWorkflow(string workflowPath)
+        {
+            return Workflows.ContainsKey(workflowPath.ToLower());
+        }
+
         public Workflow GetWorkflow(string workflowPath)
         {
+            workflowPath = workflowPath.ToLower();
             if (Workflows.ContainsKey(workflowPath))
                 return Workflows[workflowPath];
             

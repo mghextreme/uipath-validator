@@ -59,6 +59,12 @@ namespace UIPathValidator.UIPath
             return Reader;
         }
 
+        public void EnsureParse()
+        {
+            if (!Parsed)
+                ParseFile();
+        }
+
         public void ParseFile()
         {
             Reader = new XamlReader(FilePath);

@@ -52,3 +52,7 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 - Invoked Workflow name as variable
 - Many Ifs inside Ifs
 - Loops inside loops
+- State Machine validations
+  - No disconnected / orphans states
+  - Maximum 1 empty condition
+  - All states must reach another state, except final states

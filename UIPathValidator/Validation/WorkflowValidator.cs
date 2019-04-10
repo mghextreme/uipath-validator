@@ -195,7 +195,7 @@ namespace UIPathValidator.Validation
                 from Argument arg in arguments.Values
                     where workflow.Arguments.Where(x => x.Name == arg.Name).Count() == 0
                 select arg;
-            
+
             if (spareArguments.Count() > 0)
             {
                 foreach (Argument arg in spareArguments)

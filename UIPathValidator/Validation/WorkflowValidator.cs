@@ -106,30 +106,26 @@ namespace UIPathValidator.Validation
                 }
 
                 Workflow invokedWorkflow = null;
+                string fileFullPath = string.Empty;
                 string fileRelativePath = string.Empty;
 
                 if (Path.IsPathRooted(file))
                 {
-                    fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
-                    invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
+                    fileFullPath = file;
                 }
                 else
                 {
-                    if (this.Workflow.Project.HasWorkflow(file))
-                    {
-                        invokedWorkflow = this.Workflow.Project.GetWorkflow(file);
-                    }
-                    else
-                    {
-                        var fileFullPath = Path.Combine(workflowFolder, file);
-                        fileRelativePath = PathHelper.MakeRelativePath(file, this.Workflow.Project.Folder);
-                        invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
-                    }
+                    fileFullPath = Path.Combine(this.Workflow.Project.Folder, file);
+                    if (!File.Exists(fileFullPath))
+                        fileFullPath = Path.Combine(workflowFolder, file);
                 }
+
+                fileRelativePath = PathHelper.MakeRelativePath(fileFullPath, this.Workflow.Project.Folder);
+                invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
 
                 if (invokedWorkflow == null)
                 {
-                    AddResult(new InvokeValidationResult(this.Workflow, file, name, ValidationResultType.Error, $"The workflow path was not found in the project folder."));
+                    AddResult(new InvokeValidationResult(this.Workflow, fileFullPath, name, ValidationResultType.Error, $"The workflow path was not found in the project folder."));
                     continue;
                 }
 

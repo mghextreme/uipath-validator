@@ -441,8 +441,15 @@ namespace UIPathValidator.Validation
                 if (IsInsideCommentOut(delay, reader.Namespaces))
                     continue;
 
-                var delayBefore = int.Parse(delay.Attribute("DelayBefore")?.Value ?? "0");
-                var delayAfter = int.Parse(delay.Attribute("DelayMS")?.Value ?? "0");
+                string delayBeforeStr = delay.Attribute("DelayBefore")?.Value ?? string.Empty,
+                       delayAfterStr = delay.Attribute("DelayMS")?.Value ?? string.Empty;
+                int delayBefore = 0,
+                    delayAfter = 0;
+
+                if (!string.IsNullOrWhiteSpace(delayBeforeStr) && delayBeforeStr[0] != '[' && delayBeforeStr[0] != '{')
+                    delayBefore = int.Parse(delayBeforeStr);
+                if (!string.IsNullOrWhiteSpace(delayAfterStr) && delayAfterStr[0] != '[' && delayAfterStr[0] != '{')
+                    delayAfter = int.Parse(delayAfterStr);
                 Workflow.DelayOnAttributes += (decimal)(delayBefore + delayAfter) / 1000;
             }
 

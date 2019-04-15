@@ -52,6 +52,13 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 
 ## TODO
 
+### Features
+
+- Ignore specific files from validation
+- Ignore specific referees from validation
+
+### Validation
+
 - Avoid username / password variables with fixed values
 - Switches need cases
 - Invoked Workflow name as variable
@@ -61,3 +68,9 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
   - No disconnected / orphans states
   - Maximum 1 empty condition
   - All states must reach another state, except final states
+- Workflows with delay time inside loops
+- Delay activities inside loop
+
+### Interface
+
+- Create an easy-to-use graphical interface

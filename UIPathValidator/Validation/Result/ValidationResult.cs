@@ -1,4 +1,4 @@
-namespace UIPathValidator.Validation
+namespace UIPathValidator.Validation.Result
 {
     public class ValidationResult
     {

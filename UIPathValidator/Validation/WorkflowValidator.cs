@@ -9,6 +9,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using UIPathValidator.UIPath;
+using UIPathValidator.Validation.Result;
 
 namespace UIPathValidator.Validation
 {

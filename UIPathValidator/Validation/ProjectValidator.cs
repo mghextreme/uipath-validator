@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UIPathValidator.UIPath;
+using UIPathValidator.Validation.Result;
 
 namespace UIPathValidator.Validation
 {

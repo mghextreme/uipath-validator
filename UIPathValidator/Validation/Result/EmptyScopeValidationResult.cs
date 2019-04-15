@@ -1,6 +1,6 @@
 using UIPathValidator.UIPath;
 
-namespace UIPathValidator.Validation
+namespace UIPathValidator.Validation.Result
 {
     internal class EmptyScopeValidationResult : ValidationResult
     {

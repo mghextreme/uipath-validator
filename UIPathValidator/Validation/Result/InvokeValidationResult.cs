@@ -1,7 +1,7 @@
 using System.IO;
 using UIPathValidator.UIPath;
 
-namespace UIPathValidator.Validation
+namespace UIPathValidator.Validation.Result
 {
     internal class InvokeValidationResult : ValidationResult
     {

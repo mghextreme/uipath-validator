@@ -20,6 +20,11 @@ namespace UIPathValidator.Validation
             Results.Add(result);
         }
 
+        public void AddResults(ICollection<ValidationResult> results)
+        {
+            Results.AddRange(results);
+        }
+
         public IEnumerable<ValidationResult> GetResults()
         {
             return new List<ValidationResult>(Results.ToArray());

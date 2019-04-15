@@ -9,6 +9,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using UIPathValidator.UIPath;
+using UIPathValidator.Validation.Referees;
 using UIPathValidator.Validation.Result;
 
 namespace UIPathValidator.Validation
@@ -37,7 +38,7 @@ namespace UIPathValidator.Validation
             GetAndValidateInvokes();
             ValidateIfActivities();
             ValidateFlowchartActivities();
-            ValidateSequenceActivities();
+            AddResults(new EmptySequenceReferee().Validate(Workflow));
             ValidateWhileActivities();
             ValidateDoWhileActivities();
             ValidateTryCatchActivities();
@@ -298,27 +299,6 @@ namespace UIPathValidator.Validation
                         var message = "Flowchart activity doens't have any decisions. Shouldn't this be a sequence?";
                         AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Info, message));
                     }
-                }
-            }
-        }
-
-        private void ValidateSequenceActivities()
-        {
-            var reader = Workflow.GetXamlReader();
-            var sequenceTags = reader.Document.Descendants(XName.Get("Sequence", reader.Namespaces.DefaultNamespace));
-
-            foreach (var sequenceTag in sequenceTags)
-            {
-                if (IsInsideCommentOut(sequenceTag, reader.Namespaces))
-                    continue;
-
-                var insideTags = sequenceTag.Elements();
-
-                if (insideTags.Count() == 0)
-                {
-                    var name = sequenceTag.Attribute("DisplayName")?.Value ?? "Sequence";
-                    var message = "Sequence activity has no activities inside.";
-                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
             }
         }

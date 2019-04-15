@@ -18,14 +18,9 @@ namespace UIPathValidator.Validation
     {
         protected Workflow Workflow { get; set; }
 
-        private Regex timeRegex;
-        private CultureInfo enCulture;
-
         public WorkflowValidator(Workflow workflow) : base()
         {
             this.Workflow = workflow;
-            timeRegex = new Regex(@"([0-9]+):([0-9]+):([0-9]+)(\.[0-9+]+)?");
-            enCulture = CultureInfo.GetCultureInfo("en-US");
         }
 
         public override void Validate()
@@ -43,7 +38,7 @@ namespace UIPathValidator.Validation
             ValidateDoWhileActivities();
             ValidateTryCatchActivities();
             AddResults(new CommentOutReferee().Validate(Workflow));
-            ValidateDelay();
+            AddResults(new DelayReferee().Validate(Workflow));
         }
 
         private void GetAndValidateInvokes()
@@ -330,70 +325,6 @@ namespace UIPathValidator.Validation
                 }
             }
         }
-
-        private void ValidateDelay()
-        {
-            var reader = Workflow.GetXamlReader();
-
-            var delayActivities = reader.Document.Descendants(XName.Get("Delay", reader.Namespaces.DefaultNamespace));
-
-            foreach (var delay in delayActivities)
-            {
-                if (IsInsideCommentOut(delay, reader.Namespaces))
-                    continue;
-
-                var durationString = delay.Attribute("Duration")?.Value ?? "00:00:00";
-                var duration = DurationStringToSeconds(durationString);
-                if (duration > 0)
-                    Workflow.DelayOnActivities += duration;
-            }
-
-            var delayAttributeTags =
-                from el in reader.Document.Descendants()
-                where
-                    el.Attribute("DelayBefore") != null ||
-                    el.Attribute("DelayMS") != null
-                select el;
-
-            foreach (var delay in delayAttributeTags)
-            {
-                if (IsInsideCommentOut(delay, reader.Namespaces))
-                    continue;
-
-                string delayBeforeStr = delay.Attribute("DelayBefore")?.Value ?? string.Empty,
-                       delayAfterStr = delay.Attribute("DelayMS")?.Value ?? string.Empty;
-                int delayBefore = 0,
-                    delayAfter = 0;
-
-                if (!string.IsNullOrWhiteSpace(delayBeforeStr) && delayBeforeStr[0] != '[' && delayBeforeStr[0] != '{')
-                    delayBefore = int.Parse(delayBeforeStr);
-                if (!string.IsNullOrWhiteSpace(delayAfterStr) && delayAfterStr[0] != '[' && delayAfterStr[0] != '{')
-                    delayAfter = int.Parse(delayAfterStr);
-                Workflow.DelayOnAttributes += (decimal)(delayBefore + delayAfter) / 1000;
-            }
-
-            if (Workflow.DelayTotal > 1)
-            {
-                string message = "Total coded delay is of {0} seconds ({1}s in Delay activities and {2}s in attributes).";
-                message = string.Format(message, Workflow.DelayTotal.ToString("F1"), Workflow.DelayOnActivities.ToString("F1"), Workflow.DelayOnAttributes.ToString("F1"));
-                AddResult(new DelayValidationResult(this.Workflow, ValidationResultType.Info, message));
-            }
-        }
-
-        private decimal DurationStringToSeconds(string timeString)
-        {
-            var match = timeRegex.Match(timeString);
-            if (match.Success)
-            {
-                var hours = int.Parse(match.Groups[1].Value);
-                var minutes = int.Parse(match.Groups[2].Value);
-                var seconds = int.Parse(match.Groups[3].Value);
-                var millis = decimal.Parse("0" + match.Groups[4].Value, enCulture);
-                return (3600 * hours) + (60 * minutes) + seconds + millis;
-            }
-            return 0;
-        }
-
         private bool IsDirectlyInFlowchart(XElement node, XElement flowchart, XmlNamespaceManager namespaces)
         {
             var startNodes = node.Ancestors(XName.Get("Flowchart.StartNode", namespaces.DefaultNamespace));

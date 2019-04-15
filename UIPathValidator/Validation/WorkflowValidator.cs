@@ -31,11 +31,11 @@ namespace UIPathValidator.Validation
             AddResults(new ArgumentNameReferee().Validate(Workflow));
             AddResults(new VariableNameReferee().Validate(Workflow));
             GetAndValidateInvokes();
-            ValidateIfActivities();
+            AddResults(new EmptyIfReferee().Validate(Workflow));
             ValidateFlowchartActivities();
             AddResults(new EmptySequenceReferee().Validate(Workflow));
-            ValidateWhileActivities();
-            ValidateDoWhileActivities();
+            AddResults(new EmptyWhileReferee().Validate(Workflow));
+            AddResults(new EmptyDoWhileReferee().Validate(Workflow));
             ValidateTryCatchActivities();
             AddResults(new CommentOutReferee().Validate(Workflow));
             AddResults(new DelayReferee().Validate(Workflow));
@@ -162,29 +162,6 @@ namespace UIPathValidator.Validation
             }
         }
 
-        private void ValidateIfActivities()
-        {
-            var reader = Workflow.GetXamlReader();
-            var ifTags = reader.Document.Descendants(XName.Get("If", reader.Namespaces.DefaultNamespace));
-
-            foreach (var ifTag in ifTags)
-            {
-                if (IsInsideCommentOut(ifTag, reader.Namespaces))
-                    continue;
-
-                var ifThenTag = ifTag.Elements(XName.Get("If.Then", reader.Namespaces.DefaultNamespace));
-                var ifElseTag = ifTag.Elements(XName.Get("If.Else", reader.Namespaces.DefaultNamespace));
-
-                if (ifThenTag.Count() == 0 &&
-                    ifElseTag.Count() == 0)
-                {
-                    var name = ifTag.Attribute("DisplayName")?.Value ?? "If";
-                    var message = "If activity has no activities inside.";
-                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
-                }
-            }
-        }
-
         private void ValidateFlowchartActivities()
         {
             var reader = Workflow.GetXamlReader();
@@ -249,48 +226,6 @@ namespace UIPathValidator.Validation
                         var message = "Flowchart activity doens't have any decisions. Shouldn't this be a sequence?";
                         AddResult(new FlowchartValidationResult(this.Workflow, name, ValidationResultType.Info, message));
                     }
-                }
-            }
-        }
-
-        private void ValidateWhileActivities()
-        {
-            var reader = Workflow.GetXamlReader();
-            var whileTags = reader.Document.Descendants(XName.Get("While", reader.Namespaces.DefaultNamespace));
-
-            foreach (var whileTag in whileTags)
-            {
-                if (IsInsideCommentOut(whileTag, reader.Namespaces))
-                    continue;
-
-                var insideTags = whileTag.Elements();
-
-                if (insideTags.Count() == 0)
-                {
-                    var name = whileTag.Attribute("DisplayName")?.Value ?? "While";
-                    var message = "While activity has no activities inside.";
-                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
-                }
-            }
-        }
-
-        private void ValidateDoWhileActivities()
-        {
-            var reader = Workflow.GetXamlReader();
-            var doWhileTags = reader.Document.Descendants(XName.Get("DoWhile", reader.Namespaces.DefaultNamespace));
-
-            foreach (var doWhileTag in doWhileTags)
-            {
-                if (IsInsideCommentOut(doWhileTag, reader.Namespaces))
-                    continue;
-
-                var insideTags = doWhileTag.Elements();
-
-                if (insideTags.Count() == 0)
-                {
-                    var name = doWhileTag.Attribute("DisplayName")?.Value ?? "Do While";
-                    var message = "Do While activity has no activities inside.";
-                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
             }
         }

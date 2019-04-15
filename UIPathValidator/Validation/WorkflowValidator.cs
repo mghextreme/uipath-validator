@@ -42,7 +42,7 @@ namespace UIPathValidator.Validation
             ValidateWhileActivities();
             ValidateDoWhileActivities();
             ValidateTryCatchActivities();
-            ValidateCommentedActivities();
+            AddResults(new CommentOutReferee().Validate(Workflow));
             ValidateDelay();
         }
 
@@ -328,23 +328,6 @@ namespace UIPathValidator.Validation
                     var message = "Try Catch activity has no catches and/or finally.";
                     AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
                 }
-            }
-        }
-
-        private void ValidateCommentedActivities()
-        {
-            var reader = Workflow.GetXamlReader();
-            
-            if (!reader.Namespaces.HasNamespace("ui"))
-                return;
-            
-            var commentOutTags = reader.Document.Descendants(XName.Get("CommentOut", reader.Namespaces.LookupNamespace("ui")));
-
-            foreach (var commentOut in commentOutTags)
-            {
-                var name = commentOut.Attribute("DisplayName")?.Value ?? "CommentOut";
-                var message = "CommentOut activities should be removed from workflow.";
-                AddResult(new CommentOutValidationResult(this.Workflow, name, ValidationResultType.Info, message));
             }
         }
 

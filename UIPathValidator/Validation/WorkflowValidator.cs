@@ -33,8 +33,8 @@ namespace UIPathValidator.Validation
             if (!Workflow.Parsed)
                 Workflow.ParseFile();
 
-            ValidateArguments();
-            ValidateVariables();
+            AddResults(new ArgumentNameReferee().Validate(Workflow));
+            AddResults(new VariableNameReferee().Validate(Workflow));
             GetAndValidateInvokes();
             ValidateIfActivities();
             ValidateFlowchartActivities();
@@ -44,51 +44,6 @@ namespace UIPathValidator.Validation
             ValidateTryCatchActivities();
             ValidateCommentedActivities();
             ValidateDelay();
-        }
-
-        protected void ValidateArguments()
-        {
-            foreach (var argument in Workflow.Arguments)
-            {
-                if (!argument.Name.StartsWith(argument.Direction.Prefix()))
-                {
-                    AddResult(new ArgumentValidationResult(argument.Name, Workflow, ValidationResultType.Warning, $"{argument.Direction.ToString()}Argument doesn't start with prefix '{argument.Direction.Prefix()}'."));
-                }
-                else
-                {
-                    var underscorePos = argument.Name.IndexOf('_');
-                    var name = argument.Name.Substring(underscorePos + 1);
-
-                    if (ContainsAccents(name))
-                        AddResult(new ArgumentValidationResult(argument.Name, Workflow, ValidationResultType.Warning, $"Argument contains invalid non-ASCII characters."));
-                    
-                    if (!IsCapitalLetter(name[0]))
-                        AddResult(new ArgumentValidationResult(argument.Name, Workflow, ValidationResultType.Warning, $"Argument doesn't start with a capital letter."));
-                }
-            }
-        }
-
-        protected void ValidateVariables()
-        {
-            foreach (var variable in Workflow.Variables)
-            {
-                if (ContainsAccents(variable.Name))
-                    AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable contains invalid non-ASCII characters."));
-
-                if (IsCapitalLetter(variable.Name[0]))
-                    AddResult(new VariableValidationResult(variable, Workflow, ValidationResultType.Warning, $"Variable doesn't start with a lowercase letter."));
-            }
-        }
-
-        private bool IsCapitalLetter(char letter)
-        {
-            return letter >= 65 && letter <= 90;
-        }
-
-        private bool ContainsAccents(string text)
-        {
-            var ascText = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(text));
-            return !text.Equals(ascText);
         }
 
         private void GetAndValidateInvokes()

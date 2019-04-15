@@ -43,11 +43,16 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
   - Should have at least one activity in either a catch or on the finally section
 - Files
   - Files should be invoked (directly or indirectly) from the main file at least once
+- Delay
+  - Should avoid having delays, either as Delay activity or DelayBefore and DelayAfter attributes
+- Comments
+  - Should not have CommentOut activities. If the activity is not being used, it should be removed
+
+> Validation results found within CommentOut activities blocks are not listed
 
 ## TODO
 
 - Avoid username / password variables with fixed values
-- Ignore workflows errors when inside CommentOut
 - Switches need cases
 - Invoked Workflow name as variable
 - Many Ifs inside Ifs

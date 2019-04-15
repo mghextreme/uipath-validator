@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -14,9 +16,14 @@ namespace UIPathValidator.Validation
     {
         protected Workflow Workflow { get; set; }
 
+        private Regex timeRegex;
+        private CultureInfo enCulture;
+
         public WorkflowValidator(Workflow workflow) : base()
         {
             this.Workflow = workflow;
+            timeRegex = new Regex(@"([0-9]+):([0-9]+):([0-9]+)(\.[0-9+]+)?");
+            enCulture = CultureInfo.GetCultureInfo("en-US");
         }
 
         public override void Validate()
@@ -34,6 +41,7 @@ namespace UIPathValidator.Validation
             ValidateDoWhileActivities();
             ValidateTryCatchActivities();
             ValidateCommentedActivities();
+            ValidateDelay();
         }
 
         protected void ValidateArguments()
@@ -402,6 +410,62 @@ namespace UIPathValidator.Validation
                 var message = "CommentOut activities should be removed from workflow.";
                 AddResult(new CommentOutValidationResult(this.Workflow, name, ValidationResultType.Info, message));
             }
+        }
+
+        private void ValidateDelay()
+        {
+            var reader = Workflow.GetXamlReader();
+
+            var delayActivities = reader.Document.Descendants(XName.Get("Delay", reader.Namespaces.DefaultNamespace));
+
+            foreach (var delay in delayActivities)
+            {
+                if (IsInsideCommentOut(delay, reader.Namespaces))
+                    continue;
+
+                var durationString = delay.Attribute("Duration")?.Value ?? "00:00:00";
+                var duration = DurationStringToSeconds(durationString);
+                if (duration > 0)
+                    Workflow.DelayOnActivities += duration;
+            }
+
+            var delayAttributeTags =
+                from el in reader.Document.Descendants()
+                where
+                    el.Attribute("DelayBefore") != null ||
+                    el.Attribute("DelayMS") != null
+                select el;
+
+            foreach (var delay in delayAttributeTags)
+            {
+                if (IsInsideCommentOut(delay, reader.Namespaces))
+                    continue;
+
+                var delayBefore = int.Parse(delay.Attribute("DelayBefore")?.Value ?? "0");
+                var delayAfter = int.Parse(delay.Attribute("DelayMS")?.Value ?? "0");
+                Workflow.DelayOnAttributes += (decimal)(delayBefore + delayAfter) / 1000;
+            }
+
+            if (Workflow.DelayTotal > 1)
+            {
+                string message = "Total coded delay is of {0} seconds ({1}s in Delay activities and {2}s in attributes).";
+                message = string.Format(message, Workflow.DelayTotal.ToString("F1"), Workflow.DelayOnActivities.ToString("F1"), Workflow.DelayOnAttributes.ToString("F1"));
+                AddResult(new DelayValidationResult(this.Workflow, ValidationResultType.Info, message));
+            }
+        }
+
+        private decimal DurationStringToSeconds(string timeString)
+        {
+            var match = timeRegex.Match(timeString);
+            if (match.Success)
+            {
+                var hours = int.Parse(match.Groups[1].Value);
+                var minutes = int.Parse(match.Groups[2].Value);
+                var seconds = int.Parse(match.Groups[3].Value);
+                var millis = decimal.Parse("0" + match.Groups[4].Value, enCulture);
+                return (3600 * hours) + (60 * minutes) + seconds + millis;
+            }
+            return 0;
         }
 
         private bool IsDirectlyInFlowchart(XElement node, XElement flowchart, XmlNamespaceManager namespaces)

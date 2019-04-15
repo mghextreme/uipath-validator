@@ -28,6 +28,12 @@ namespace UIPathValidator.UIPath
 
         protected XamlReader Reader { get; set; }
 
+        public decimal DelayOnActivities { get; set; }
+
+        public decimal DelayOnAttributes { get; set; }
+
+        public decimal DelayTotal => DelayOnActivities + DelayOnAttributes;
+
         public string RelativePath
         {
             get

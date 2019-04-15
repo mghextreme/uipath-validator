@@ -2,7 +2,7 @@ using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation.Result
 {
-    public class CommentOutValidationResult : ValidationResult
+    public class CommentOutValidationResult : ValidationResult, IWorkflowValidationResult, IActivityValidationResult
     {
         public string TaskName { get; set; }
         public Workflow Workflow { get; set; }

@@ -1,6 +1,6 @@
 namespace UIPathValidator.Validation.Result
 {
-    public class ValidationResult
+    public class ValidationResult : IValidationResult
     {
         public ValidationResultType Type { get; set; }
 

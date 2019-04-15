@@ -2,7 +2,7 @@ using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation.Result
 {
-    public class UnreachableWorkflowValidationResult : ValidationResult
+    public class UnreachableWorkflowValidationResult : ValidationResult, IWorkflowValidationResult
     {
         public Workflow Workflow { get; set; }
 

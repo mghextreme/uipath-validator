@@ -2,7 +2,7 @@ using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation.Result
 {
-    public class DelayValidationResult : ValidationResult
+    public class DelayValidationResult : ValidationResult, IWorkflowValidationResult
     {
         public Workflow Workflow { get; set; }
 

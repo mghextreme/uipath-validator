@@ -2,7 +2,7 @@ using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation.Result
 {
-    public class ArgumentValidationResult : ValidationResult
+    public class ArgumentValidationResult : ValidationResult, IWorkflowValidationResult
     {
         public string ArgumentName { get; set; }
         public Workflow Workflow { get; set; }

@@ -3,6 +3,7 @@ using System.Linq;
 using CommandLine;
 using UIPathValidator.UIPath;
 using UIPathValidator.Validation;
+using UIPathValidator.Validation.Result;
 
 namespace UIPathValidator.CLI
 {

@@ -1,9 +1,9 @@
 using System.IO;
 using UIPathValidator.UIPath;
 
-namespace UIPathValidator.Validation
+namespace UIPathValidator.Validation.Result
 {
-    internal class InvokeValidationResult : ValidationResult
+    internal class InvokeValidationResult : ValidationResult, IWorkflowValidationResult, IActivityValidationResult
     {
         public Workflow Workflow { get; set; }
         public string File { get; set; }

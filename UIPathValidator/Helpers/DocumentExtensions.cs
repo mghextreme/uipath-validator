@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -22,6 +23,15 @@ namespace UIPathValidator
                 nodeReader.MoveToContent();
                 return XDocument.Load(nodeReader);
             }
+        }
+
+        public static bool IsInsideCommentOut(this XElement node, XmlNamespaceManager namespaces)
+        {
+            if (!namespaces.HasNamespace("ui"))
+                return false;
+
+            var ancestorComment = node.Ancestors(XName.Get("CommentOut", namespaces.LookupNamespace("ui")));
+            return ancestorComment.Any();
         }
     }
 }

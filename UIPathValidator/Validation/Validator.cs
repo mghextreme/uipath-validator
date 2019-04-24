@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UIPathValidator.Validation.Result;
 
 namespace UIPathValidator.Validation
 {
@@ -17,6 +18,11 @@ namespace UIPathValidator.Validation
         public void AddResult(ValidationResult result)
         {
             Results.Add(result);
+        }
+
+        public void AddResults(ICollection<ValidationResult> results)
+        {
+            Results.AddRange(results);
         }
 
         public IEnumerable<ValidationResult> GetResults()

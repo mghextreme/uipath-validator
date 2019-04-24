@@ -41,8 +41,7 @@
                 "-c",
                 "Release",
                 "-r",
-                "win10-x64",
-                "--self-contained"
+                "win10-x64"
             ],
             "problemMatcher": "$msCompile"
         }

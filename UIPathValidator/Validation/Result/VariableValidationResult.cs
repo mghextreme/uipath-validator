@@ -1,8 +1,8 @@
 using UIPathValidator.UIPath;
 
-namespace UIPathValidator.Validation
+namespace UIPathValidator.Validation.Result
 {
-    internal class VariableValidationResult : ValidationResult
+    internal class VariableValidationResult : ValidationResult, IWorkflowValidationResult
     {
         public Variable Variable { get; set; }
         public Workflow Workflow { get; set; }

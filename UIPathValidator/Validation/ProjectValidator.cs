@@ -20,49 +20,23 @@ namespace UIPathValidator.Validation
         {
             Project.EnsureLoad();
 
+            // First, validate files individually
             var workflows = Project.GetWorkflows();
             var workflowReferees = GetWorkflowReferees();
-
-            // First, validate files individually
             foreach (Workflow workflow in workflows)
             {
                 workflow.EnsureParse();
                 foreach (IWorkflowReferee referee in workflowReferees)
                 {
-                    Results.AddRange(referee.Validate(workflow));
+                    AddResults(referee.Validate(workflow));
                 }
             }
 
-            // Validate InvokeWorkflow graph
-            Project.ResetWorkflowsColors();
-            var stack = new Stack<Workflow>();
-
-            if (Project.InitialWorkflow != null)
+            // Then validate project as a whole
+            var projectReferees = GetProjectReferees();
+            foreach (IProjectReferee referee in projectReferees)
             {
-                Project.InitialWorkflow.UseStatus = UseStatus.Used;
-                PaintWorfklow(Project.InitialWorkflow, stack);
-            }
-            else
-            {
-                foreach (var workflow in Project.GetWorkflows())
-                    PaintWorfklow(workflow, stack);
-            }
-
-            var notUsed = 
-                from workflow in Project.GetWorkflows()
-                    where workflow.UseStatus == UseStatus.NotMentioned
-                select workflow;
-
-            foreach (var workflow in notUsed)
-            {
-                string message = Project.HasDynamicallyInvokedWorkflows ?
-                    "This workflow is never directly invoked. If it is unreachable consider removing it." :
-                    "The workflow is unreachable because it is never invoked. Should this file be removed?";
-                ValidationResultType type = Project.HasDynamicallyInvokedWorkflows ?
-                    ValidationResultType.Info :
-                    ValidationResultType.Warning;
-
-                Results.Add(new UnreachableWorkflowValidationResult(workflow, type, message));
+                AddResults(referee.Validate(Project));
             }
         }
 
@@ -83,47 +57,11 @@ namespace UIPathValidator.Validation
             return referees;
         }
 
-        protected void PaintWorfklow(Workflow workflow, Stack<Workflow> stack)
+        private ICollection<IProjectReferee> GetProjectReferees()
         {
-            if (workflow.Color == GraphColor.Black)
-                return;
-
-            if (workflow.Color == GraphColor.Gray)
-            {
-                string cycleText = GetCycleText(stack, workflow);
-                string message = string.Format("The workflow contains a recursive invoke cycle. Make sure it is not an infinite loop: {0}.", cycleText);
-                var temp = stack.Pop();
-                AddResult(new InvokeValidationResult(stack.Peek(), workflow.FilePath, string.Empty, ValidationResultType.Info, message));
-                stack.Push(temp);
-                return;
-            }
-
-            if (stack.Count > 0)
-                workflow.UseStatus = UseStatus.Used;
-
-            workflow.Color = GraphColor.Gray;
-            stack.Push(workflow);
-
-            foreach (var sub in workflow.ConnectedWorkflow)
-                PaintWorfklow(sub, stack);
-
-            stack.Pop();
-            workflow.Color = GraphColor.Black;
-        }
-
-        private string GetCycleText(Stack<Workflow> stack, Workflow leaf)
-        {
-            var enumerator = stack.GetEnumerator();
-            string cycleText = leaf.RelativePath;
-            while (enumerator.MoveNext())
-            {
-                var item = enumerator.Current;
-                cycleText = item.RelativePath + " -> " + cycleText;
-
-                if (item == leaf)
-                    break;
-            }
-            return cycleText;
+            var referees = new List<IProjectReferee>();
+            referees.Add(new WorkflowGraphReferee());
+            return referees;
         }
     }
 }

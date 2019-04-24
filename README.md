@@ -6,13 +6,19 @@ The application will run on a specified folder and check for many inconsistences
 
 ## How to use it
 
-Open the solution and make sure to publish it:
+`UIPathValidator.CLI.exe validate -p <your-project-file-or-folder>`
+
+## Compiling the code
+
+If you are using Visual Studio, just compile the code using the Release configuration for Windows 10 (or your OS of choice).
+
+If you are using VS Code, just open the solution and make sure to run the task to publish it:
 
 `Ctrl + Shift + P > Tasks: Run Task > publish`
 
-After published, you may open the project folder for the `UIPathValidator.CLI`, navigate to the folder containing the `.exe` (probably `\bin\Release\netcoreapp2.1\win10-x64`) and run the following command:
+> This task will publish it by default to Windows 10 64 bits OS. If you need a different one, go into `.vscode\tasks.json` and change it.
 
-`UIPathValidator.CLI.exe validate -p <your-project-folder>`
+After published, you may open the project folder for the `UIPathValidator.CLI`, navigate to the folder containing the `.exe` (probably `\bin\Release\netcoreapp2.1\win10-x64`) and run the following command:
 
 ## Validations
 
@@ -48,7 +54,7 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 - Comments
   - Should not have CommentOut activities. If the activity is not being used, it should be removed
 
-> Validation results found within CommentOut activities blocks are not listed
+> Validation results found within CommentOut activities blocks are not returned
 
 ## TODO
 

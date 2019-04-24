@@ -36,7 +36,7 @@ namespace UIPathValidator.Validation
             AddResults(new EmptySequenceReferee().Validate(Workflow));
             AddResults(new EmptyWhileReferee().Validate(Workflow));
             AddResults(new EmptyDoWhileReferee().Validate(Workflow));
-            ValidateTryCatchActivities();
+            AddResults(new MinimalTryCatchReferee().Validate(Workflow));
             AddResults(new CommentOutReferee().Validate(Workflow));
             AddResults(new DelayReferee().Validate(Workflow));
         }
@@ -53,7 +53,7 @@ namespace UIPathValidator.Validation
 
             foreach (var invoke in invokes)
             {
-                if (IsInsideCommentOut(invoke, reader.Namespaces))
+                if (invoke.IsInsideCommentOut(reader.Namespaces))
                     continue;
 
                 var name = invoke.Attribute("DisplayName")?.Value;
@@ -169,7 +169,7 @@ namespace UIPathValidator.Validation
 
             foreach (var flowchartTag in flowchartTags)
             {
-                if (IsInsideCommentOut(flowchartTag, reader.Namespaces))
+                if (flowchartTag.IsInsideCommentOut(reader.Namespaces))
                     continue;
 
                 var startNode = flowchartTag.Element(XName.Get("Flowchart.StartNode", reader.Namespaces.DefaultNamespace));
@@ -230,36 +230,6 @@ namespace UIPathValidator.Validation
             }
         }
 
-        private void ValidateTryCatchActivities()
-        {
-            var reader = Workflow.GetXamlReader();
-            var tryCatchTags = reader.Document.Descendants(XName.Get("TryCatch", reader.Namespaces.DefaultNamespace));
-
-            foreach (var tryCatchTag in tryCatchTags)
-            {
-                if (IsInsideCommentOut(tryCatchTag, reader.Namespaces))
-                    continue;
-
-                var name = tryCatchTag.Attribute("DisplayName")?.Value ?? "Do While";
-                
-                var tcTry = tryCatchTag.Element(XName.Get("TryCatch.Try", reader.Namespaces.DefaultNamespace));
-                var tcCatches = tryCatchTag.Element(XName.Get("TryCatch.Catches", reader.Namespaces.DefaultNamespace));
-                var tcFinally = tryCatchTag.Element(XName.Get("TryCatch.Finally", reader.Namespaces.DefaultNamespace));
-
-                if (tcTry == null || tcTry.Elements().Count() == 0)
-                {
-                    var message = "Try Catch activity has no activities inside.";
-                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
-                }
-
-                if ((tcCatches == null || tcCatches.Elements().Count() == 0) &&
-                    (tcFinally == null || tcFinally.Elements().Count() == 0))
-                {
-                    var message = "Try Catch activity has no catches and/or finally.";
-                    AddResult(new EmptyScopeValidationResult(this.Workflow, name, ValidationResultType.Warning, message));
-                }
-            }
-        }
         private bool IsDirectlyInFlowchart(XElement node, XElement flowchart, XmlNamespaceManager namespaces)
         {
             var startNodes = node.Ancestors(XName.Get("Flowchart.StartNode", namespaces.DefaultNamespace));
@@ -276,15 +246,6 @@ namespace UIPathValidator.Validation
                 return true;
             
             return false;
-        }
-
-        private bool IsInsideCommentOut(XElement node, XmlNamespaceManager namespaces)
-        {
-            if (!namespaces.HasNamespace("ui"))
-                return false;
-
-            var ancestorComment = node.Ancestors(XName.Get("CommentOut", namespaces.LookupNamespace("ui")));
-            return ancestorComment.Any();
         }
     }
 }

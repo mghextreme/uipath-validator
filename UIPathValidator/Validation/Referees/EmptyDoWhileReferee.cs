@@ -8,7 +8,7 @@ namespace UIPathValidator.Validation.Referees
 {
     public class EmptyDoWhileReferee : IWorkflowReferee
     {
-        public string Code => "empty-while";
+        public string Code => "empty-dowhile";
 
         public ICollection<ValidationResult> Validate(Workflow workflow)
         {

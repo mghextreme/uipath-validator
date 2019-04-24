@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UIPathValidator.UIPath;
+using UIPathValidator.Validation.Referees;
 using UIPathValidator.Validation.Result;
 
 namespace UIPathValidator.Validation
@@ -20,17 +21,20 @@ namespace UIPathValidator.Validation
             Project.EnsureLoad();
 
             var workflows = Project.GetWorkflows();
+            var workflowReferees = GetWorkflowReferees();
 
             // First, validate files individually
             foreach (Workflow workflow in workflows)
             {
-                var validator = new WorkflowValidator(workflow);
-                validator.Validate();
-                Results.AddRange(validator.GetResults());
+                workflow.EnsureParse();
+                foreach (IWorkflowReferee referee in workflowReferees)
+                {
+                    Results.AddRange(referee.Validate(workflow));
+                }
             }
 
             // Validate InvokeWorkflow graph
-            ResetWorkflowsColors();
+            Project.ResetWorkflowsColors();
             var stack = new Stack<Workflow>();
 
             if (Project.InitialWorkflow != null)
@@ -62,13 +66,21 @@ namespace UIPathValidator.Validation
             }
         }
 
-        protected void ResetWorkflowsColors()
+        private ICollection<IWorkflowReferee> GetWorkflowReferees()
         {
-            foreach (var workflow in Project.GetWorkflows())
-            {
-                workflow.Color = GraphColor.White;
-                workflow.UseStatus = UseStatus.NotMentioned;
-            }
+            var referees = new List<IWorkflowReferee>();
+            referees.Add(new ArgumentNameReferee());
+            referees.Add(new VariableNameReferee());
+            referees.Add(new InvokeWorkflowReferee());
+            referees.Add(new EmptyIfReferee());
+            referees.Add(new FlowchartReferee());
+            referees.Add(new EmptySequenceReferee());
+            referees.Add(new EmptyWhileReferee());
+            referees.Add(new EmptyDoWhileReferee());
+            referees.Add(new MinimalTryCatchReferee());
+            referees.Add(new CommentOutReferee());
+            referees.Add(new DelayReferee());
+            return referees;
         }
 
         protected void PaintWorfklow(Workflow workflow, Stack<Workflow> stack)

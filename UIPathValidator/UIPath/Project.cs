@@ -163,5 +163,14 @@ namespace UIPathValidator.UIPath
             
             return null;
         }
+
+        public void ResetWorkflowsColors()
+        {
+            foreach (var workflow in GetWorkflows())
+            {
+                workflow.Color = GraphColor.White;
+                workflow.UseStatus = UseStatus.NotMentioned;
+            }
+        }
     }
 }

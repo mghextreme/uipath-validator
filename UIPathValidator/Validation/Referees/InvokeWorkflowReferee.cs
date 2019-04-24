@@ -1,55 +1,27 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml;
 using System.Xml.Linq;
-using System.Xml.XPath;
 using UIPathValidator.UIPath;
-using UIPathValidator.Validation.Referees;
 using UIPathValidator.Validation.Result;
 
-namespace UIPathValidator.Validation
+namespace UIPathValidator.Validation.Referees
 {
-    public class WorkflowValidator : Validator
+    public class InvokeWorkflowReferee : IWorkflowReferee
     {
-        protected Workflow Workflow { get; set; }
+        public string Code => "invoke-workflow";
 
-        public WorkflowValidator(Workflow workflow) : base()
+        public ICollection<ValidationResult> Validate(Workflow workflow)
         {
-            this.Workflow = workflow;
-        }
+            var results = new List<ValidationResult>();
 
-        public override void Validate()
-        {
-            if (!Workflow.Parsed)
-                Workflow.ParseFile();
-
-            AddResults(new ArgumentNameReferee().Validate(Workflow));
-            AddResults(new VariableNameReferee().Validate(Workflow));
-            GetAndValidateInvokes();
-            AddResults(new EmptyIfReferee().Validate(Workflow));
-            AddResults(new FlowchartReferee().Validate(Workflow));
-            AddResults(new EmptySequenceReferee().Validate(Workflow));
-            AddResults(new EmptyWhileReferee().Validate(Workflow));
-            AddResults(new EmptyDoWhileReferee().Validate(Workflow));
-            AddResults(new MinimalTryCatchReferee().Validate(Workflow));
-            AddResults(new CommentOutReferee().Validate(Workflow));
-            AddResults(new DelayReferee().Validate(Workflow));
-        }
-
-        private void GetAndValidateInvokes()
-        {
-            var reader = Workflow.GetXamlReader();
+            var reader = workflow.GetXamlReader();
 
             if (!reader.Namespaces.HasNamespace("ui"))
-                return;
+                return results;
 
             var invokes = reader.Document.Descendants(XName.Get("InvokeWorkflowFile", reader.Namespaces.LookupNamespace("ui")));
-            var workflowFolder = Path.GetDirectoryName(Workflow.FilePath);
+            var workflowFolder = Path.GetDirectoryName(workflow.FilePath);
 
             foreach (var invoke in invokes)
             {
@@ -61,7 +33,7 @@ namespace UIPathValidator.Validation
 
                 if (file.StartsWith("[") && file.EndsWith("]"))
                 {
-                    this.Workflow.HasDynamicallyInvokedWorkflows = true;
+                    workflow.HasDynamicallyInvokedWorkflows = true;
                     continue;
                 }
 
@@ -75,21 +47,21 @@ namespace UIPathValidator.Validation
                 }
                 else
                 {
-                    fileFullPath = Path.Combine(this.Workflow.Project.Folder, file);
+                    fileFullPath = Path.Combine(workflow.Project.Folder, file);
                     if (!File.Exists(fileFullPath))
                         fileFullPath = Path.Combine(workflowFolder, file);
                 }
 
-                fileRelativePath = PathHelper.MakeRelativePath(fileFullPath, this.Workflow.Project.Folder);
-                invokedWorkflow = this.Workflow.Project.GetWorkflow(fileRelativePath);
+                fileRelativePath = PathHelper.MakeRelativePath(fileFullPath, workflow.Project.Folder);
+                invokedWorkflow = workflow.Project.GetWorkflow(fileRelativePath);
 
                 if (invokedWorkflow == null)
                 {
-                    AddResult(new InvokeValidationResult(this.Workflow, fileFullPath, name, ValidationResultType.Error, $"The workflow path was not found in the project folder."));
+                    results.Add(new InvokeValidationResult(workflow, fileFullPath, name, ValidationResultType.Error, $"The workflow path was not found in the project folder."));
                     continue;
                 }
 
-                this.Workflow.ConnectedWorkflow.Add(invokedWorkflow);
+                workflow.ConnectedWorkflow.Add(invokedWorkflow);
 
                 var argumentsParent = invoke.Elements(XName.Get("InvokeWorkflowFile.Arguments", reader.Namespaces.LookupNamespace("ui")));
                 var argumentsElements = argumentsParent.Elements();
@@ -107,12 +79,16 @@ namespace UIPathValidator.Validation
                             break;
                     }
                 }
-                CheckInvokedArguments(invokedWorkflow, arguments, name);
+                results.AddRange(CheckInvokedArguments(invokedWorkflow, arguments, name));
             }
+
+            return results;
         }
 
-        private void CheckInvokedArguments(Workflow workflow, Dictionary<string, Argument> arguments, string displayName)
+        private ICollection<ValidationResult> CheckInvokedArguments(Workflow workflow, Dictionary<string, Argument> arguments, string displayName)
         {
+            var results = new List<ValidationResult>();
+
             workflow.EnsureParse();
 
             // Check if all invoked arguments have been called
@@ -122,7 +98,7 @@ namespace UIPathValidator.Validation
                 if (!arguments.ContainsKey(arg.Name))
                 {
                     var message = string.Format("The workflow argument {0} is not being called by the invoke activity.", arg.Name);
-                    AddResult(new InvokeValidationResult(this.Workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                    results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
                 }
                 else
                 {
@@ -132,7 +108,7 @@ namespace UIPathValidator.Validation
                     if (arg.Direction != usedArg.Direction)
                     {
                         var message = string.Format("The argument {0} is of direction {1} but is used as {2}.", arg.Name, arg.Direction, usedArg.Direction);
-                        AddResult(new InvokeValidationResult(this.Workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                        results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
                         continue;
                     }
 
@@ -140,7 +116,7 @@ namespace UIPathValidator.Validation
                     if (arg.Type != usedArg.Type)
                     {
                         var message = string.Format("The argument {0} is of type {1} but is used as {2}.", arg.Name, arg.Type, usedArg.Type);
-                        AddResult(new InvokeValidationResult(this.Workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                        results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
                         continue;
                     }
                 }
@@ -157,9 +133,11 @@ namespace UIPathValidator.Validation
                 foreach (Argument arg in spareArguments)
                 {
                     var message = string.Format("The called argument {0} doesn't exists in the workflow.", arg.Name);
-                    AddResult(new InvokeValidationResult(this.Workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                    results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
                 }
             }
+
+            return results;
         }
     }
 }

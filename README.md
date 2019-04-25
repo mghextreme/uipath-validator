@@ -47,6 +47,9 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 - Try Catch
   - Should have at least one activity in the Try section
   - Should have at least one activity in either a catch or on the finally section
+- Switch
+  - Should have at least one case besides Default
+  - Should have at least one activity in each case
 - Files
   - Files should be invoked (directly or indirectly) from the main file at least once
 - Delay
@@ -66,7 +69,6 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 ### Validation
 
 - Avoid username / password variables with fixed values
-- Switches need cases
 - Invoked Workflow name as variable
 - Many Ifs inside Ifs
 - Loops inside loops

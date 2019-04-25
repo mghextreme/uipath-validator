@@ -51,6 +51,7 @@ namespace UIPathValidator.Validation
             referees.Add(new EmptySequenceReferee());
             referees.Add(new EmptyWhileReferee());
             referees.Add(new EmptyDoWhileReferee());
+            referees.Add(new EmptySwitchReferee());
             referees.Add(new MinimalTryCatchReferee());
             referees.Add(new CommentOutReferee());
             referees.Add(new DelayReferee());

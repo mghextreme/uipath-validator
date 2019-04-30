@@ -42,8 +42,11 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
   - Do While activities should have at least one activity inside
   - If activities should have at least one activity on either then or else
 - Flowchart
-  - Should not have any disconnected / orphans activities
+  - Should not have any disconnected / orphan activities
   - Suggests that Flowchart with no decisions or switches should be sequences
+- State Machine
+  - Should not have any disconnected / orphan states
+  - All non-final states must have an exit and reach a final state
 - Try Catch
   - Should have at least one activity in the Try section
   - Should have at least one activity in either a catch or on the finally section
@@ -65,6 +68,8 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 
 - Ignore specific files from validation
 - Ignore specific referees from validation
+- Logging to file
+- More details on error location (line)
 
 ### Validation
 
@@ -72,10 +77,10 @@ After published, you may open the project folder for the `UIPathValidator.CLI`, 
 - Invoked Workflow name as variable
 - Many Ifs inside Ifs
 - Loops inside loops
+- Retry Scopes content and conditions
 - State Machine validations
-  - No disconnected / orphans states
   - Maximum 1 empty condition
-  - All states must reach another state, except final states
+  - State Machines inside State Machines
 - Workflows with delay time inside loops
 - Delay activities inside loop
 

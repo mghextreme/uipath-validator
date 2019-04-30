@@ -28,7 +28,7 @@ namespace UIPathValidator.Validation.Referees
 
                 if (startNode == null)
                 {
-                    var message = "Flowchart activity doens't have a Start Node.";
+                    var message = "Flowchart activity doesn't have a Start Node.";
                     results.Add(new FlowchartValidationResult(workflow, name, ValidationResultType.Warning, message));
                 }
                 else
@@ -37,7 +37,7 @@ namespace UIPathValidator.Validation.Referees
 
                     if (orphanNodes.Count() > 0)
                     {
-                        var message = string.Format("Flowchart contains {0} node{1} that will never be reached. Either use {2} ot delete {2}.",
+                        var message = string.Format("Flowchart contains {0} node{1} that will never be reached. Either use {2} or delete {2}.",
                             orphanNodes.Count(),
                             orphanNodes.Count() > 1 ? "s" : string.Empty,
                             orphanNodes.Count() > 1 ? "them" : "it");

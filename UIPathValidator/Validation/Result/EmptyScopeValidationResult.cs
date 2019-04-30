@@ -2,7 +2,7 @@ using UIPathValidator.UIPath;
 
 namespace UIPathValidator.Validation.Result
 {
-    internal class EmptyScopeValidationResult : ValidationResult
+    internal class EmptyScopeValidationResult : ValidationResult, IWorkflowValidationResult, IActivityValidationResult
     {
         public string TaskName { get; set; }
         public Workflow Workflow { get; set; }

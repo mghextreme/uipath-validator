@@ -79,26 +79,26 @@ namespace UIPathValidator.Validation.Referees
                             break;
                     }
                 }
-                results.AddRange(CheckInvokedArguments(invokedWorkflow, arguments, name));
+                results.AddRange(CheckInvokedArguments(invokedWorkflow, workflow, arguments, name));
             }
 
             return results;
         }
 
-        private ICollection<ValidationResult> CheckInvokedArguments(Workflow workflow, Dictionary<string, Argument> arguments, string displayName)
+        private ICollection<ValidationResult> CheckInvokedArguments(Workflow invokedworkflow, Workflow originalWorkflow, Dictionary<string, Argument> arguments, string displayName)
         {
             var results = new List<ValidationResult>();
 
-            workflow.EnsureParse();
+            invokedworkflow.EnsureParse();
 
             // Check if all invoked arguments have been called
-            foreach (var arg in workflow.Arguments)
+            foreach (var arg in invokedworkflow.Arguments)
             {
                 // Check if the argument is imported
                 if (!arguments.ContainsKey(arg.Name))
                 {
                     var message = string.Format("The workflow argument {0} is not being called by the invoke activity.", arg.Name);
-                    results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                    results.Add(new InvokeValidationResult(originalWorkflow, invokedworkflow.FilePath, displayName, ValidationResultType.Error, message));
                 }
                 else
                 {
@@ -108,7 +108,7 @@ namespace UIPathValidator.Validation.Referees
                     if (arg.Direction != usedArg.Direction)
                     {
                         var message = string.Format("The argument {0} is of direction {1} but is used as {2}.", arg.Name, arg.Direction, usedArg.Direction);
-                        results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                        results.Add(new InvokeValidationResult(originalWorkflow, invokedworkflow.FilePath, displayName, ValidationResultType.Error, message));
                         continue;
                     }
 
@@ -116,7 +116,7 @@ namespace UIPathValidator.Validation.Referees
                     if (arg.Type != usedArg.Type)
                     {
                         var message = string.Format("The argument {0} is of type {1} but is used as {2}.", arg.Name, arg.Type, usedArg.Type);
-                        results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                        results.Add(new InvokeValidationResult(originalWorkflow, invokedworkflow.FilePath, displayName, ValidationResultType.Error, message));
                         continue;
                     }
                 }
@@ -125,7 +125,7 @@ namespace UIPathValidator.Validation.Referees
             // Check if there are spare arguments
             var spareArguments =
                 from Argument arg in arguments.Values
-                    where workflow.Arguments.Where(x => x.Name == arg.Name).Count() == 0
+                    where invokedworkflow.Arguments.Where(x => x.Name == arg.Name).Count() == 0
                 select arg;
 
             if (spareArguments.Count() > 0)
@@ -133,7 +133,7 @@ namespace UIPathValidator.Validation.Referees
                 foreach (Argument arg in spareArguments)
                 {
                     var message = string.Format("The called argument {0} doesn't exists in the workflow.", arg.Name);
-                    results.Add(new InvokeValidationResult(workflow, workflow.FilePath, displayName, ValidationResultType.Error, message));
+                    results.Add(new InvokeValidationResult(originalWorkflow, invokedworkflow.FilePath, displayName, ValidationResultType.Error, message));
                 }
             }
 
